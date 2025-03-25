@@ -1,1 +1,4 @@
-/devdata/*_zarr
+/devdata/*.zarr
+venv
+*.ipynb
+__pycache__
