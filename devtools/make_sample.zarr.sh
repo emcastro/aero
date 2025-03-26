@@ -4,6 +4,7 @@ set -xeuo pipefail
 
 cd "$(dirname "$0")"/../devdata
 
+# TILE_NAME=N48W001
 TILE_NAME=N49W001
 
 curl https://openmaps.online/eudem_download/eu_4326/arc1/$TILE_NAME.zip -o $TILE_NAME.zip
