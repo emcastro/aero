@@ -1,0 +1,27 @@
+{
+  "zarr_format":3,
+  "node_type":"array",
+  "shape":[
+    "${shape}"
+  ],
+  "data_type":"float64",
+  "chunk_grid":{
+    "name":"regular",
+    "configuration":{
+      "chunk_shape":[
+        "${chunk_shape}"
+      ]
+    }
+  },
+  "chunk_key_encoding":{
+    "name":"default",
+    "configuration":{
+      "separator":"\/"
+    }
+  },
+  "fill_value":"NaN",
+  "attributes":{},
+  "dimension_names":[
+    "${dimension_name}"
+  ]
+}
