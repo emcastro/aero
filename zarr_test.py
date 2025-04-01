@@ -54,7 +54,7 @@ def parse_zarr_template(template_name: str, path: str) -> dict:
         elif template_type is bool:
             check_equals(template, data, path)
         else:
-            raise ValueError()
+            raise ValueError("Invalid JSON")
 
     parse_and_check(template, data, [path])
 
@@ -64,8 +64,5 @@ def parse_zarr_template(template_name: str, path: str) -> dict:
 print(parse_zarr_template("root_zarr.json", "devdata/N48W001.zarr/zarr.json"))
 print(parse_zarr_template("xy_zarr.json", "devdata/N48W001.zarr/X/zarr.json"))
 print(parse_zarr_template("xy_zarr.json", "devdata/N48W001.zarr/Y/zarr.json"))
+print(parse_zarr_template("data_zarr.json", "devdata/N48W001.zarr/N48W001/zarr.json"))
 
-# p = re.compile(r"\$\{(.*)\}")
-# m = p.match("${foo}")
-# if m:
-#     print(m.group(1))
