@@ -1,7 +1,7 @@
 from microzarr import match_json_template, ZarrError, check_equals, Axis
 import os
 
-root = "devdata/N48W001.zarr"
+root = "devdata/N49W001.zarr"
 os.chdir(root)
 
 #############
@@ -43,29 +43,16 @@ print(alti_metadata)
 
 ##############
 
-# TODO charge les mapping X et Y
-# data = X_data
-# data_name = "X"
 
+x_axis = Axis.from_group(X_metadata)
+y_axis = Axis.from_group(Y_metadata)
 
+# Milieu de piste, Carpiquet
+x = -0.4561
+y = 49.17617
 
+row = x_axis.to_idx(x)
+column = y_axis.to_idx(y)
 
-# target = -0.9
-# axis = Axis.from_group(X_metadata)
-# print(axis.values)
-# idx = axis.to_idx(target)
-# print(idx)
-# print(target)
-# print(axis[idx - 1])
-# print(axis[idx], "<<<")
-# print(axis[idx + 1])
+print(f"Row: {row}, Column: {column}")
 
-target = 50
-axis = Axis.from_group(Y_metadata)
-print(axis.values)
-idx = axis.to_idx(target)
-print(idx)
-print(target)
-print(axis[idx - 1])
-print(axis[idx], "<<<")
-print(axis[idx + 1])
