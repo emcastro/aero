@@ -35,6 +35,9 @@ if len(groups) != 1:
 
 [main_group] = groups
 alti_metadata = match_json_template("data_zarr.json", f"{main_group}/zarr.json")
+chunk_height = alti_metadata["chunk_height"]
+chunk_width = alti_metadata["chunk_width"]
+
 
 print(X_metadata)
 print(Y_metadata)
@@ -51,8 +54,25 @@ y_axis = Axis.from_group(Y_metadata)
 x = -0.4561
 y = 49.17617
 
-row = x_axis.to_idx(x)
-column = y_axis.to_idx(y)
+
+row = y_axis.to_idx(y)
+column = x_axis.to_idx(x)
 
 print(f"Row: {row}, Column: {column}")
 
+chunk_id_x = column // chunk_width
+chunk_id_y = row // chunk_height
+chunk_column = column % chunk_width
+chunk_row = row % chunk_height
+print(f"-Row: {chunk_id_y} : {chunk_row}, -Column: {chunk_id_x} : {chunk_column}")
+
+import struct
+
+with open(f"{main_group}/c/{chunk_id_y}/{chunk_id_x}", "rb") as file:
+
+    data = memoryview(file.read())
+
+    data_pos = (chunk_width * chunk_row + chunk_column) * 2
+    print(data_pos)
+    print(struct.unpack("<h", data[data_pos : data_pos + 2]))
+    print(data[data_pos] + (data[data_pos + 1] << 8))

@@ -2,16 +2,16 @@
   "zarr_format":3,
   "node_type":"array",
   "shape":[
-    "${width}",
-    "${height}"
+    "${height}",
+    "${width}"
   ],
   "data_type":"int16",
   "chunk_grid":{
     "name":"regular",
     "configuration":{
       "chunk_shape":[
-        "${chunk_width}",
-        "${chunk_height}"
+        "${chunk_height}",
+        "${chunk_width}"
       ]
     }
   },
