@@ -1,13 +1,17 @@
+from array import array
 import json
+import struct
+from macropython import micropython
 from microtyping import List
-
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
 
+
 class ZarrError(Exception):
-    def __init__(self, message: str):
+    def __init__(self, message):
         super().__init__(message)
         self.message = message
+
 
 def read_json_resource(name: str):
     return read_json(f"{DIR_NAME}/{name}")
@@ -18,9 +22,7 @@ def read_json(name: str):
         with open(name, "r", encoding="utf-8") as file:
             return json.load(file)
     except OSError as exp:
-        raise ZarrError(
-            f"Could not read JSON file {name}: {exp}"
-        ) from exp
+        raise ZarrError(f"Could not read JSON file {name}: {exp}") from exp
 
 
 def check_equals(template, data, path):
@@ -38,11 +40,7 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
         data_type = type(data)
 
         # Check if the template is a variable
-        if (
-            template_type is str
-            and template.startswith("${")
-            and template.endswith("}")
-        ):
+        if template_type is str and template.startswith("${") and template.endswith("}"):
             var = template[2:-1]
             bindings[var] = data
 
@@ -80,3 +78,56 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
     parse_and_check(template, data, [json_filepath])
 
     return bindings
+
+
+class Axis:
+    def __init__(self, values: array[float]):
+        assert len(values) > 1
+        self.values = values
+        self.standard_orientation = self.values[0] <= self.values[-1]
+
+    @staticmethod
+    def from_group(metadata):
+        # If true, only one file in ${data_name}/c
+        assert metadata["shape"] == metadata["chunk_shape"]
+
+        with open(f"{metadata['dimension_name']}/c/0", "rb") as file:
+            data_array = array("d", struct.unpack(f"<{metadata['shape']}d", file.read()))
+            return Axis(data_array)
+
+    @micropython.native
+    def to_idx(self, target_value: float):
+        # Binary search in self.value of nearest value
+        low, high = 0, len(self.values) - 1
+        while low <= high:
+            mid = (low + high) // 2
+            mid_value = self.values[mid]
+            if self.standard_orientation:
+                if mid_value < target_value:
+                    low = mid + 1
+                elif mid_value > target_value:
+                    high = mid - 1
+                else:
+                    return mid
+            else:
+                if mid_value < target_value:
+                    high = mid - 1
+                elif mid_value > target_value:
+                    low = mid + 1
+                else:
+                    return mid
+
+        # At this point, high is before low
+        assert high + 1 == low
+
+        # Find closest value
+        a = abs(self.values[high] - target_value)
+        b = abs(self.values[low] - target_value)
+
+        if a < b:
+            return high
+        else:
+            return low
+
+    def __getitem__(self, idx: int):
+        return self.values[idx]
