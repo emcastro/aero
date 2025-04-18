@@ -18,4 +18,4 @@ else:
         return value
 
 
-__all__ = ["micropython","const"]
+__all__ = ["micropython", "const"]

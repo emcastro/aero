@@ -1,32 +1,31 @@
 from math import radians, degrees, sin, cos, asin, atan2
 from macropython import *
 
-# Rayon moyen de la Terre en mètres
+# Average radius of the Earth in meters
 R = const(6371008.8)
 
-
-# Comme wgs84_direct mais en plus rapide, c.-à-d. projète un point à partir de lat/lon sur
-# l'orthodromie d'azimuth alpha (en degrée) à une distance r (en mètre)
-def wgs84_project(lon, lat, cap, distance):
-    # Convertir les valeurs initiales en radians
+# Pprojects a point from lat/lon on the great circle with azimuth alpha (in degrees)
+# at a distance (in meters)
+def wgs84_project(lon, lat, azimuth, distance):
+    # Convert initial values to radians
     lat = radians(lat)
     lon = radians(lon)
-    cap = radians(cap)
+    azimuth = radians(azimuth)
 
-    # Calculer la distance angulaire
+    # Calculate the angular distance
     delta = distance / R
 
-    # Calculer la latitude de B en radians
-    lat_b = asin(sin(lat) * cos(delta) + cos(lat) * sin(delta) * cos(cap))
+    # Calculate the latitude of target in radians
+    target_lat = asin(sin(lat) * cos(delta) + cos(lat) * sin(delta) * cos(azimuth))
 
-    # Calculer la différence de longitude en radians
-    delta_lon = atan2(sin(cap) * sin(delta) * cos(lat), cos(delta) - sin(lat) * sin(lat_b))
+    # Calculate the longitude difference in radians
+    delta_lon = atan2(sin(azimuth) * sin(delta) * cos(lat), cos(delta) - sin(lat) * sin(target_lat))
 
-    # Calculer la longitude de B
-    lon_b = lon + delta_lon
+    # Calculate the longitude of target in radians
+    taget_lon = lon + delta_lon
 
-    # Convertir les résultats en degrés
-    lat_b = degrees(lat_b)
-    lon_b = degrees(lon_b)
+    # Convert the results to degrees
+    target_lat = degrees(target_lat)
+    taget_lon = degrees(taget_lon)
 
-    return lon_b, lat_b
+    return taget_lon, target_lat
