@@ -222,10 +222,12 @@ class Axis:
         standard_orientation (bool): Indicates whether the axis values are in ascending order.
     """
 
-    def __init__(self, values: array[float]):
-        assert len(values) > 1
-        self.values = values
-        self.standard_orientation = self.values[0] <= self.values[-1]
+    def __init__(self, values_path: str):
+        self.values = open(values_path, "rb")
+        self.values_size = self.values.seek(0, 2)//8
+        print("self.values_size", self.values_size)
+        # self.values = values
+        self.standard_orientation = self[0] <= self[self.values_size - 1]
 
     @staticmethod
     def from_group(path: str, metadata: dict):
@@ -242,9 +244,7 @@ class Axis:
         # If true, only one file in ${data_name}/c
         assert metadata["shape"] == metadata["chunk_shape"]
 
-        with open(f"{path}/{metadata['dimension_name']}/c/0", "rb") as file:
-            data_array = array("d", struct.unpack(f"<{metadata['shape']}d", file.read()))
-            return Axis(data_array)
+        return Axis(f"{path}/{metadata['dimension_name']}/c/0")
 
     @micropython.native
     def to_idx(self, target_value: float):
@@ -258,10 +258,10 @@ class Axis:
             int: The index of the closest value.
         """
         # Binary search in self.value of nearest value
-        low, high = 0, len(self.values) - 1
+        low, high = 0, self.values_size - 1
         while low <= high:
             mid = (low + high) // 2
-            mid_value = self.values[mid]
+            mid_value = self[mid]
             if self.standard_orientation:
                 if mid_value < target_value:
                     low = mid + 1
@@ -281,8 +281,8 @@ class Axis:
         assert high + 1 == low
 
         # Find closest value
-        a = abs(self.values[high] - target_value)
-        b = abs(self.values[low] - target_value)
+        a = abs(self[high] - target_value)
+        b = abs(self[low] - target_value)
 
         if a < b:
             return high
@@ -299,4 +299,7 @@ class Axis:
         Returns:
             float: The coordinate value at the specified index.
         """
-        return self.values[idx]
+        print("==========",idx )
+        self.values.seek(idx * 8)
+        data = struct.unpack("<d", self.values.read(8))
+        return data[0]
