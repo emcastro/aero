@@ -1,16 +1,38 @@
+import os
 from array import array
 import json
 import struct
 from macropython import micropython
 from microtyping import List
-import os
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
 
 
-class Zarr: # pylint: disable=R0902
+class Zarr:  # pylint: disable=R0902
+    """
+    Represents a Zarr dataset and provides methods to access its data.
 
-    def __init__(self, path):
+    Internal attributes:
+        path (str): Path to the Zarr dataset.
+        main_group (str): Name of the main data group.
+        chunk_height (int): Height of each data chunk.
+        chunk_width (int): Width of each data chunk.
+        x_axis (Axis): X-axis metadata and mapping.
+        y_axis (Axis): Y-axis metadata and mapping.
+        data (bytearray): Preallocated buffer for chunk data.
+        data_xy (tuple): Coordinates of the currently loaded chunk.
+    """
+
+    def __init__(self, path: str):
+        """
+        Initializes the Zarr object by analyzing the dataset structure.
+
+        Args:
+            path (str): Path to the Zarr dataset.
+
+        Raises:
+            ZarrError: If the dataset structure is invalid.
+        """
         # Analyze the Zarr structure
         groups = set(os.listdir(path))
 
@@ -46,10 +68,10 @@ class Zarr: # pylint: disable=R0902
         chunk_height = alti_metadata["chunk_height"]
         chunk_width = alti_metadata["chunk_width"]
 
-        # Initialize storage
-        # data are stored in a preallocated bytearray
+        # Initialize storage:
+        # Data are stored in a preallocated bytearray
         # to avoid memory fragmentation
-        buffer_size = chunk_height * chunk_width * 2 # Assume data is in unsigned int16
+        buffer_size = chunk_height * chunk_width * 2  # Assume data is in unsigned int16
         data = bytearray(buffer_size)
 
         # Store attributes
@@ -58,13 +80,24 @@ class Zarr: # pylint: disable=R0902
         self.chunk_height = chunk_height
         self.chunk_width = chunk_width
 
-        self.x_axis = Axis.from_group(path, x_metadata)
+        self.x_axis = Axis.from_group(path, x_metadata)  # TODO improve memory allocation
         self.y_axis = Axis.from_group(path, y_metadata)
 
         self.data = data
-        self.data_xy = (None, None) # Current chunk loaded
+        self.data_xy = (None, None)  # Current chunk loaded
 
+    @micropython.native
     def value_at(self, x: float, y: float):
+        """
+        Retrieves the value at the specified coordinates.
+
+        Args:
+            x (float): Longitude.
+            y (float): Latitude.
+
+        Returns:
+            int: The value at the specified coordinates.
+        """
         row = self.y_axis.to_idx(y)
         column = self.x_axis.to_idx(x)
 
@@ -82,7 +115,15 @@ class Zarr: # pylint: disable=R0902
         data_pos = (chunk_width * chunk_row + chunk_column) * 2
         return struct.unpack_from("<h", self.data, data_pos)[0]
 
+    @micropython.native
     def load_chunk(self, chunk_id_x, chunk_id_y):
+        """
+        Loads the specified chunk into the buffer.
+
+        Args:
+            chunk_id_x (int): Chunk ID along the X-axis.
+            chunk_id_y (int): Chunk ID along the Y-axis.
+        """
         if self.data_xy == (chunk_id_x, chunk_id_y):
             return
 
@@ -95,6 +136,10 @@ class Zarr: # pylint: disable=R0902
 
 
 class ZarrError(Exception):
+    """
+    Custom exception for Zarr-related errors.
+    """
+
     def __init__(self, message):
         super().__init__(message)
         self.message = message
@@ -168,6 +213,15 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
 
 
 class Axis:
+    """
+    Represents an axis in the Zarr dataset, providing methods for mapping between
+    coordinate values and their corresponding indices.
+
+    Attributes:
+        values (array[float]): Array of coordinate values along the axis.
+        standard_orientation (bool): Indicates whether the axis values are in ascending order.
+    """
+
     def __init__(self, values: array[float]):
         assert len(values) > 1
         self.values = values
@@ -175,6 +229,16 @@ class Axis:
 
     @staticmethod
     def from_group(path: str, metadata: dict):
+        """
+        Creates an Axis instance from the metadata of a Zarr group.
+
+        Args:
+            path (str): Path to the Zarr dataset.
+            metadata (dict): Metadata containing axis information.
+
+        Returns:
+            Axis: An instance of the Axis class.
+        """
         # If true, only one file in ${data_name}/c
         assert metadata["shape"] == metadata["chunk_shape"]
 
@@ -184,6 +248,15 @@ class Axis:
 
     @micropython.native
     def to_idx(self, target_value: float):
+        """
+        Finds the index of the closest value to the target value on the axis.
+
+        Args:
+            target_value (float): The coordinate value to find the index for.
+
+        Returns:
+            int: The index of the closest value.
+        """
         # Binary search in self.value of nearest value
         low, high = 0, len(self.values) - 1
         while low <= high:
@@ -217,4 +290,13 @@ class Axis:
             return low
 
     def __getitem__(self, idx: int):
+        """
+        Retrieves the coordinate value at the specified index.
+
+        Args:
+            idx (int): The index of the coordinate value.
+
+        Returns:
+            float: The coordinate value at the specified index.
+        """
         return self.values[idx]
