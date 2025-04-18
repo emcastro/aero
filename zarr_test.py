@@ -2,12 +2,12 @@ import time
 from microzarr import Zarr
 from geolib import wgs84_project
 
-"""
-This script demonstrates the usage of the Zarr library and the `wgs84_project` function.
-It projects a point along a great circle path and retrieves elevation data from a Zarr dataset.
-"""
 
 def run():
+    """
+    This script demonstrates the usage of the Zarr library and the `wgs84_project` function.
+    It projects a point along a great circle path and retrieves elevation data from a Zarr dataset.
+    """
     tm1 = time.time()
     zarr = Zarr("devdata/FRnw.zarr")
 
