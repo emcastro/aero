@@ -1,4 +1,5 @@
 /devdata/*.zarr
+/devdata2/
 venv
 *.ipynb
 __pycache__
