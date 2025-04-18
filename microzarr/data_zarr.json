@@ -23,27 +23,8 @@
   },
   "fill_value":"${fill_value}",
   "attributes":{
-    "AREA_OR_POINT":"Point",
     "_CRS":{
       "projjson":{
-        "datum":{
-          "ellipsoid":{
-            "name":"WGS 84"
-          }
-        },
-        "coordinate_system":{
-          "subtype":"ellipsoidal",
-          "axis":[
-            {
-              "direction":"north",
-              "unit":"degree"
-            },
-            {
-              "direction":"east",
-              "unit":"degree"
-            }
-          ]
-        },
         "id":{
           "authority":"EPSG",
           "code":4326

@@ -3,8 +3,95 @@ import json
 import struct
 from macropython import micropython
 from microtyping import List
+import os
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
+
+
+class Zarr: # pylint: disable=R0902
+
+    def __init__(self, path):
+        # Analyze the Zarr structure
+        groups = set(os.listdir(path))
+
+        def consume_key(key):
+            if key in groups:
+                groups.remove(key)
+            else:
+                raise ZarrError(f"Key {key} not found in data at path {path}")
+
+        # Check zarr type
+        consume_key("zarr.json")
+        [] = match_json_template("root_zarr.json", f"{path}/zarr.json")
+
+        # Get X axis mapping between column and longitude
+        consume_key("X")
+        x_metadata = match_json_template("xy_zarr.json", f"{path}/X/zarr.json")
+        check_equals(x_metadata["dimension_name"], "X", ["X/zarr.json", "dimension_name"])
+
+        # Get Y axis mapping between row and latitude
+        consume_key("Y")
+        y_metadata = match_json_template("xy_zarr.json", f"{path}/Y/zarr.json")
+        check_equals(y_metadata["dimension_name"], "Y", ["Y/zarr.json", "dimension_name"])
+
+        # Get lone data group
+        if len(groups) != 1:
+            raise ZarrError(
+                f"Expected one group, found {len(groups)}: {groups} at path {path}",
+            )
+        [main_group] = groups
+
+        # Read data group organization (chunk size, etc.)
+        alti_metadata = match_json_template("data_zarr.json", f"{path}/{main_group}/zarr.json")
+        chunk_height = alti_metadata["chunk_height"]
+        chunk_width = alti_metadata["chunk_width"]
+
+        # Initialize storage
+        # data are stored in a preallocated bytearray
+        # to avoid memory fragmentation
+        buffer_size = chunk_height * chunk_width * 2 # Assume data is in unsigned int16
+        data = bytearray(buffer_size)
+
+        # Store attributes
+        self.path = path
+        self.main_group = main_group
+        self.chunk_height = chunk_height
+        self.chunk_width = chunk_width
+
+        self.x_axis = Axis.from_group(path, x_metadata)
+        self.y_axis = Axis.from_group(path, y_metadata)
+
+        self.data = data
+        self.data_xy = (None, None) # Current chunk loaded
+
+    def value_at(self, x: float, y: float):
+        row = self.y_axis.to_idx(y)
+        column = self.x_axis.to_idx(x)
+
+        chunk_width = self.chunk_width
+        chunk_height = self.chunk_height
+
+        chunk_id_x = column // chunk_width
+        chunk_id_y = row // chunk_height
+        chunk_column = column % chunk_width
+        chunk_row = row % chunk_height
+
+        self.load_chunk(chunk_id_x, chunk_id_y)
+
+        # Assume data is in unsigned int16
+        data_pos = (chunk_width * chunk_row + chunk_column) * 2
+        return struct.unpack_from("<h", self.data, data_pos)[0]
+
+    def load_chunk(self, chunk_id_x, chunk_id_y):
+        if self.data_xy == (chunk_id_x, chunk_id_y):
+            return
+
+        # Load the chunk data into the buffer
+        with open(f"{self.path}/{self.main_group}/c/{chunk_id_y}/{chunk_id_x}", "rb") as file:
+            file.readinto(self.data)
+
+        # Update the current chunk
+        self.data_xy = (chunk_id_x, chunk_id_y)
 
 
 class ZarrError(Exception):
@@ -87,11 +174,11 @@ class Axis:
         self.standard_orientation = self.values[0] <= self.values[-1]
 
     @staticmethod
-    def from_group(metadata):
+    def from_group(path: str, metadata: dict):
         # If true, only one file in ${data_name}/c
         assert metadata["shape"] == metadata["chunk_shape"]
 
-        with open(f"{metadata['dimension_name']}/c/0", "rb") as file:
+        with open(f"{path}/{metadata['dimension_name']}/c/0", "rb") as file:
             data_array = array("d", struct.unpack(f"<{metadata['shape']}d", file.read()))
             return Axis(data_array)
 

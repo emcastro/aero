@@ -14,5 +14,8 @@ else:
         def native(func):
             return func
 
+    def const(value):
+        return value
 
-__all__ = ["micropython"]
+
+__all__ = ["micropython","const"]
