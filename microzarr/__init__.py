@@ -1,11 +1,12 @@
 import os
-from array import array
 import json
 import struct
-from macropython import micropython
+from macropython import *
 from microtyping import List
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
+
+DATA_SIZE = 2  # Assume data is in unsigned int16
 
 
 class Zarr:  # pylint: disable=R0902
@@ -71,7 +72,7 @@ class Zarr:  # pylint: disable=R0902
         # Initialize storage:
         # Data are stored in a preallocated bytearray
         # to avoid memory fragmentation
-        buffer_size = chunk_height * chunk_width * 2  # Assume data is in unsigned int16
+        buffer_size = chunk_height * chunk_width * DATA_SIZE  # Assume data is in unsigned int16
         data = bytearray(buffer_size)
 
         # Store attributes
@@ -80,7 +81,7 @@ class Zarr:  # pylint: disable=R0902
         self.chunk_height = chunk_height
         self.chunk_width = chunk_width
 
-        self.x_axis = Axis.from_group(path, x_metadata)  # TODO improve memory allocation
+        self.x_axis = Axis.from_group(path, x_metadata)
         self.y_axis = Axis.from_group(path, y_metadata)
 
         self.data = data
@@ -111,8 +112,8 @@ class Zarr:  # pylint: disable=R0902
 
         self.load_chunk(chunk_id_x, chunk_id_y)
 
+        data_pos = (chunk_width * chunk_row + chunk_column) * DATA_SIZE
         # Assume data is in unsigned int16
-        data_pos = (chunk_width * chunk_row + chunk_column) * 2
         return struct.unpack_from("<h", self.data, data_pos)[0]
 
     @micropython.native
@@ -212,22 +213,28 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
     return bindings
 
 
+COORDINATE_SIZE = const(8)  # Assume data is in double 64bit
+SEEK_END = const(2)  # os.SEEK_END
+
+
 class Axis:
     """
     Represents an axis in the Zarr dataset, providing methods for mapping between
     coordinate values and their corresponding indices.
 
     Attributes:
-        values (array[float]): Array of coordinate values along the axis.
-        standard_orientation (bool): Indicates whether the axis values are in ascending order.
+        data_file (file): File object for reading coordinate values. The file is left open.
+        data_size (int): Number of coordinate values.
+        standard_orientation (bool): Indicates if the axis is in standard orientation.
     """
 
     def __init__(self, values_path: str):
-        self.values = open(values_path, "rb")
-        self.values_size = self.values.seek(0, 2)//8
-        print("self.values_size", self.values_size)
-        # self.values = values
-        self.standard_orientation = self[0] <= self[self.values_size - 1]
+        # Open the file containing the coordinate values, and leave it open
+        self.data_file = open(values_path, "rb")  # pylint: disable=R1732
+        self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
+
+        # Now that self.data_file, with can use __getitem__ to read the values
+        self.standard_orientation = self[0] <= self[self.data_size - 1]
 
     @staticmethod
     def from_group(path: str, metadata: dict):
@@ -258,7 +265,7 @@ class Axis:
             int: The index of the closest value.
         """
         # Binary search in self.value of nearest value
-        low, high = 0, self.values_size - 1
+        low, high = 0, self.data_size - 1
         while low <= high:
             mid = (low + high) // 2
             mid_value = self[mid]
@@ -299,7 +306,7 @@ class Axis:
         Returns:
             float: The coordinate value at the specified index.
         """
-        print("==========",idx )
-        self.values.seek(idx * 8)
-        data = struct.unpack("<d", self.values.read(8))
+        # TODO add LRU cache
+        self.data_file.seek(idx * COORDINATE_SIZE)
+        data = struct.unpack("<d", self.data_file.read(8))
         return data[0]
