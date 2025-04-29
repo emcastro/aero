@@ -14,8 +14,11 @@ Fun with Zarr v3 (as of QGIS Desktop) in MicroPython
   - Reasonably simple
   - Easy to audit using GDAL
 
+# Memory footpring
+
+- Around 100Kb : micropython -v -X heapsize=103936 # 0x19600
+
 # References
 
-- https://docs.micropython.org/en/latest/library/index.html
-- https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html
-
+- <https://docs.micropython.org/en/latest/library/index.html>
+- <https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html>

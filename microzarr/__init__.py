@@ -72,8 +72,7 @@ class Zarr:  # pylint: disable=R0902
         # Initialize storage:
         # Data are stored in a preallocated bytearray
         # to avoid memory fragmentation
-        buffer_size = chunk_height * chunk_width * DATA_SIZE  # Assume data is in unsigned int16
-        data = bytearray(buffer_size)
+        data = bytearray(2)  # TODO Altitude size
 
         # Store attributes
         self.path = path
@@ -85,7 +84,6 @@ class Zarr:  # pylint: disable=R0902
         self.y_axis = Axis.from_group(path, y_metadata)
 
         self.data = data
-        self.data_xy = (None, None)  # Current chunk loaded
 
     @micropython.native
     def value_at(self, x: float, y: float):
@@ -110,30 +108,14 @@ class Zarr:  # pylint: disable=R0902
         chunk_column = column % chunk_width
         chunk_row = row % chunk_height
 
-        self.load_chunk(chunk_id_x, chunk_id_y)
-
         data_pos = (chunk_width * chunk_row + chunk_column) * DATA_SIZE
-        # Assume data is in unsigned int16
-        return struct.unpack_from("<h", self.data, data_pos)[0]
 
-    @micropython.native
-    def load_chunk(self, chunk_id_x, chunk_id_y):
-        """
-        Loads the specified chunk into the buffer.
-
-        Args:
-            chunk_id_x (int): Chunk ID along the X-axis.
-            chunk_id_y (int): Chunk ID along the Y-axis.
-        """
-        if self.data_xy == (chunk_id_x, chunk_id_y):
-            return
-
-        # Load the chunk data into the buffer
         with open(f"{self.path}/{self.main_group}/c/{chunk_id_y}/{chunk_id_x}", "rb") as file:
+            file.seek(data_pos)
             file.readinto(self.data)
 
-        # Update the current chunk
-        self.data_xy = (chunk_id_x, chunk_id_y)
+        # Assume data is in unsigned int16
+        return struct.unpack_from("<h", self.data)[0]
 
 
 class ZarrError(Exception):
@@ -232,6 +214,7 @@ class Axis:
         # Open the file containing the coordinate values, and leave it open
         self.data_file = open(values_path, "rb")  # pylint: disable=R1732
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
+        self.coordinate_buffer = bytearray(COORDINATE_SIZE)
 
         # Now that self.data_file, with can use __getitem__ to read the values
         self.standard_orientation = self[0] <= self[self.data_size - 1]
@@ -308,5 +291,6 @@ class Axis:
         """
         # TODO add LRU cache
         self.data_file.seek(idx * COORDINATE_SIZE)
-        data = struct.unpack("<d", self.data_file.read(8))
+        self.data_file.readinto(self.coordinate_buffer)
+        data = struct.unpack("<d", self.coordinate_buffer)
         return data[0]
