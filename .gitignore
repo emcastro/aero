@@ -1,4 +1,4 @@
-/devdata/*.zarr
+/devdata/
 /devdata2/
 venv
 *.ipynb

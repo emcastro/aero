@@ -18,8 +18,11 @@ gdal_translate \
         -co "FORMAT=ZARR_V3" \
         -co "CHUNK_MEMORY_LAYOUT=C" \
         -co "DIM_SEPARATOR=/" \
-        -co "BLOCKSIZE=200,200" \
+        -co "BLOCKSIZE=30,30" \
         -co "COMPRESS=NONE" \
         $TILE_NAME/$TILE_NAME.HGT $TILE_NAME.zarr
+
+rm -f $TILE_NAME.zarr.zip
+zip -0 -r $TILE_NAME.zarr.zip $TILE_NAME.zarr
 
 rm -rf $TILE_NAME $TILE_NAME.zip
