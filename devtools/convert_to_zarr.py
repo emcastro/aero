@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import zipfile
@@ -5,6 +6,7 @@ import zipfile
 import click
 import rasterio
 from rasterio.merge import merge
+from typing import List
 
 BLOCKSIZE = 30
 
@@ -38,6 +40,11 @@ def gdal_aero_zarr(out, sources):
 
     # Create a ZIP file from the Zarr output
     offset = 0
+    offset_table = OffsetTable()
+    previous_x = None
+    previous_y = None
+
+    tile_index_re = re.compile(r".*/(\d+)/(\d+)")
 
     zip_filename = f"{out}.zip"
     with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_STORED) as zipf:
@@ -46,12 +53,39 @@ def gdal_aero_zarr(out, sources):
                 file_path = os.path.join(root, file)
                 arcname = os.path.relpath(file_path, start=os.path.dirname(out))
                 zipf.write(file_path, arcname=arcname)
-                print(arcname)
                 info = zipf.getinfo(arcname)
-                print(info, info.header_offset, info.header_offset- offset)
+
                 offset = info.header_offset
 
+                match = tile_index_re.match(arcname)
+                if match:
+                    tile_x_str, tile_y_str = match.groups()
+                    tile_x, tile_y = int(tile_x_str), int(tile_y_str)
+
+                    new_row = previous_x != tile_x
+                    if new_row:
+                        offset_table.new_row(tile_x)
+
+                    new_column = previous_y != tile_y - 1
+                    if new_column:
+                        offset_table.absolute_column(tile_y, offset)
+
+                    if not new_column:
+                        assert not new_row
+                        size = offset - previous_offset
+                        offset_table.relative_offset(size)
+
+                    previous_y = tile_y
+                    previous_x = tile_x
+                else:
+                    print("untracked file")
+
+                previous_offset = offset
+
+                print(arcname)
+
     print(f"Zarr file has been zipped as {zip_filename}")
+    offset_table.dump()
 
 
 def natural_sort_key(value: str):
@@ -59,6 +93,61 @@ def natural_sort_key(value: str):
     if value.isdigit():
         return int(value)
     return value
+
+
+from dataclasses import dataclass, asdict
+
+
+@dataclass
+class RepeatedOffset:
+    value: int
+    count: int
+
+
+@dataclass
+class RowPart:
+    offset: int
+    deltas: List[RepeatedOffset]
+
+
+class OffsetTable:
+    def __init__(self):
+        self.rows = {}
+        self.current_row = None
+        self.current_row_part = None
+
+    def new_row(self, tile_x):
+        print(f"Adding new row: {tile_x}")
+        assert tile_x not in self.rows
+        self.current_row = {}
+        self.rows[tile_x] = self.current_row
+
+    def absolute_column(self, tile_y, offset):
+        print(f"Adding new column: {tile_y} @{offset}")
+        assert tile_y not in self.current_row
+        # self.compact_current_row_part()
+        self.current_row_part = RowPart(offset, [])
+        self.current_row[tile_y] = self.current_row_part
+
+    def relative_offset(self, size):
+        # Get the last offset in the current row part
+        if self.current_row_part.deltas == []:
+            self.current_row_part.deltas.append(RepeatedOffset(size, 1))
+        else:
+            current_repeated_offset = self.current_row_part.deltas[-1]
+            if current_repeated_offset.value == size:
+                current_repeated_offset.count += 1
+        print(f"Adding relative offset: {size}")
+
+    def dump(self):
+        print(json.dumps(self.rows, indent=2, cls=DataclassEncoder))
+
+
+class DataclassEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, "__dataclass_fields__"):
+            return obj.__dict__
+        return super().default(obj)
 
 
 if __name__ == "__main__":
