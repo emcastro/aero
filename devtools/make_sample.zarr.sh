@@ -1,28 +1,30 @@
 #!/bin/bash
 
-set -xeuo pipefail
+set -euo pipefail
 
 cd "$(dirname "$0")"/../devdata
 
 # TILE_NAME=N48W001
 TILE_NAME=N49W001
 
-curl https://openmaps.online/eudem_download/eu_4326/arc1/$TILE_NAME.zip -o $TILE_NAME.zip
-rm -rf $TILE_NAME
-unzip $TILE_NAME.zip
-rm -rf $TILE_NAME.zarr
-# Creation options (-co) precondition for our Micropython decoder (except BLOCKSIZE)
-# They are often default values, but we set them explicitly to avoid future changes
-gdal_translate \
-        -of Zarr \
-        -co "FORMAT=ZARR_V3" \
-        -co "CHUNK_MEMORY_LAYOUT=C" \
-        -co "DIM_SEPARATOR=/" \
-        -co "BLOCKSIZE=30,30" \
-        -co "COMPRESS=NONE" \
-        $TILE_NAME/$TILE_NAME.HGT $TILE_NAME.zarr
+OUT_NAME=$TILE_NAME
 
-rm -f $TILE_NAME.zarr.zip
-zip -0 -r $TILE_NAME.zarr.zip $TILE_NAME.zarr
+if [ -f "$TILE_NAME.zip" ]; then
+  echo "$TILE_NAME.zip already exists, skipping download."
+else
+  if curl https://openmaps.online/eudem_download/eu_4326/arc1/$TILE_NAME.zip -o "$TILE_NAME".zip
+  then 
+    rm -rf "$TILE_NAME"
+    unzip "$TILE_NAME".zip || true
+  else
+    echo "Failed to download $TILE_NAME.zip"    
+  fi
+fi
 
-rm -rf $TILE_NAME $TILE_NAME.zip
+rm -rf $OUT_NAME.zarr
+rm -f $OUT_NAME.zarr.zip
+
+python ../devtools/convert_to_zarr.py --out $OUT_NAME.zarr $TILE_NAME/*.HGT
+       
+#   rm -rf "$TILE_NAME" "$TILE_NAME".zip
+

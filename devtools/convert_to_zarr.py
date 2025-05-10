@@ -1,3 +1,4 @@
+import struct
 import json
 import os
 import re
@@ -8,7 +9,7 @@ import rasterio
 from rasterio.merge import merge
 from typing import List
 
-BLOCKSIZE = 30
+BLOCKSIZE = 100
 
 
 @click.command()
@@ -77,12 +78,8 @@ def gdal_aero_zarr(out, sources):
 
                     previous_y = tile_y
                     previous_x = tile_x
-                else:
-                    print("untracked file")
 
                 previous_offset = offset
-
-                print(arcname)
 
     print(f"Zarr file has been zipped as {zip_filename}")
     offset_table.dump()
@@ -117,15 +114,12 @@ class OffsetTable:
         self.current_row_part = None
 
     def new_row(self, tile_x):
-        print(f"Adding new row: {tile_x}")
         assert tile_x not in self.rows
         self.current_row = {}
         self.rows[tile_x] = self.current_row
 
     def absolute_column(self, tile_y, offset):
-        print(f"Adding new column: {tile_y} @{offset}")
         assert tile_y not in self.current_row
-        # self.compact_current_row_part()
         self.current_row_part = RowPart(offset, [])
         self.current_row[tile_y] = self.current_row_part
 
@@ -137,10 +131,25 @@ class OffsetTable:
             current_repeated_offset = self.current_row_part.deltas[-1]
             if current_repeated_offset.value == size:
                 current_repeated_offset.count += 1
-        print(f"Adding relative offset: {size}")
 
     def dump(self):
-        print(json.dumps(self.rows, indent=2, cls=DataclassEncoder))
+
+        # Write the offset table to a binary file
+        with open("offset_table.bin", "bw") as f:
+            for tile_x, row in self.rows.items():
+                f.write(struct.pack("<H", tile_x))
+                f.write(struct.pack("<H", len(row)))
+                for tile_y, row_part in row.items():
+                    f.write(struct.pack("<H", tile_y))
+                    f.write(struct.pack("<Q", row_part.offset))
+                    f.write(struct.pack("<H", len(row_part.deltas)))
+                    for repeated_offset in row_part.deltas:
+                        f.write(struct.pack("<I", repeated_offset.value))
+                        f.write(struct.pack("<H", repeated_offset.count))
+
+        # Write the offset table to a JSON file (for debugging)
+        with open("offset_table.json", "w") as f:
+            json.dump(self.rows, f, indent=2, cls=DataclassEncoder)
 
 
 class DataclassEncoder(json.JSONEncoder):

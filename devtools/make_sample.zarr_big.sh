@@ -23,15 +23,14 @@ for TILE_NAME in "${TILE_NAMES[@]}"
 do 
   if [ -f "$TILE_NAME.zip" ]; then
     echo "$TILE_NAME.zip already exists, skipping download."
-    continue
-  fi
-
-  if curl https://openmaps.online/eudem_download/eu_4326/arc1/$TILE_NAME.zip -o "$TILE_NAME".zip
-  then 
-    rm -rf "$TILE_NAME"
-    unzip "$TILE_NAME".zip || true
   else
-    echo "Failed to download $TILE_NAME.zip"    
+    if curl https://openmaps.online/eudem_download/eu_4326/arc1/$TILE_NAME.zip -o "$TILE_NAME".zip
+    then 
+      rm -rf "$TILE_NAME"
+      unzip "$TILE_NAME".zip || true
+    else
+      echo "Failed to download $TILE_NAME.zip"    
+    fi
   fi
 done
 
