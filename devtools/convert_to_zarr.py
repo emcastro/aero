@@ -127,6 +127,8 @@ class OffsetTable:
         # Get the last offset in the current row part
         if self.current_row_part.deltas == []:
             self.current_row_part.deltas.append(RepeatedOffset(size, 1))
+        elif self.current_row_part.deltas[-1].value != size:
+            self.current_row_part.deltas.append(RepeatedOffset(size, 1))
         else:
             current_repeated_offset = self.current_row_part.deltas[-1]
             if current_repeated_offset.value == size:
