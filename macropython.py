@@ -3,7 +3,7 @@
 import sys
 
 if sys.implementation.name == "micropython":
-    import micropython
+    import micropython # type: ignore
 
 else:
     from typing import *

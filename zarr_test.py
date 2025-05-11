@@ -1,7 +1,7 @@
 import time
 from microzarr import Zarr
 from geolib import wgs84_project
-
+import gc
 
 def run():
     """
@@ -10,6 +10,7 @@ def run():
     """
     tm1 = time.time()
     zarr = Zarr("devdata/FRnw.zarr")
+    gc.collect() # Clean up temp object from Zarr reading
 
     t0 = time.time()
     x = -0.4561
