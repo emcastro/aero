@@ -42,16 +42,22 @@ def gdal_aero_zarr(out, sources):
     # Create a ZIP file from the Zarr output
     offset = 0
     offset_table = OffsetTable()
-    previous_x = None
+    previous_x = -1
     previous_y = None
 
     tile_index_re = re.compile(r".*/(\d+)/(\d+)")
 
     zip_filename = f"{out}.zip"
+
+    files = [
+        os.path.join(root, file)
+        for root, _, files in os.walk(out)
+        for file in files
+    ]
+
     with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_STORED) as zipf:
-        for root, _, files in sorted(os.walk(out)):
-            for file in sorted(files, key=natural_sort_key):
-                file_path = os.path.join(root, file)
+        for file_path in sorted(files, key=natural_sort_tuple_key):
+                print("Adding file:", file_path)
                 arcname = os.path.relpath(file_path, start=os.path.dirname(out))
                 zipf.write(file_path, arcname=arcname)
                 info = zipf.getinfo(arcname)
@@ -65,6 +71,9 @@ def gdal_aero_zarr(out, sources):
 
                     new_row = previous_x != tile_x
                     if new_row:
+                        # if rows a missing (no_data), add them
+                        for padding_tile_x in range(previous_x + 1, tile_x):
+                            offset_table.new_row(padding_tile_x)    
                         offset_table.new_row(tile_x)
 
                     new_column = previous_y != tile_y - 1
@@ -84,6 +93,10 @@ def gdal_aero_zarr(out, sources):
     print(f"Zarr file has been zipped as {zip_filename}")
     offset_table.dump()
 
+
+def natural_sort_tuple_key(value: str):
+    """Key to tuples in natural order."""
+    return [natural_sort_key(v) for v in value.split("/")]
 
 def natural_sort_key(value: str):
     """Key to strings in natural order."""
@@ -109,14 +122,15 @@ class RowPart:
 
 class OffsetTable:
     def __init__(self):
-        self.rows = {}
+        self.rows = []
         self.current_row = None
         self.current_row_part = None
 
     def new_row(self, tile_x):
-        assert tile_x not in self.rows
+        print("New row", tile_x)
+        assert tile_x == len(self.rows)
         self.current_row = {}
-        self.rows[tile_x] = self.current_row
+        self.rows.append(self.current_row)
 
     def absolute_column(self, tile_y, offset):
         assert tile_y not in self.current_row
@@ -138,8 +152,8 @@ class OffsetTable:
 
         # Write the offset table to a binary file
         with open("offset_table.bin", "bw") as f:
-            for tile_x, row in self.rows.items():
-                f.write(struct.pack("<H", tile_x))
+            f.write(struct.pack("<H", len(self.rows)))
+            for row in self.rows:
                 f.write(struct.pack("<H", len(row)))
                 for tile_y, row_part in row.items():
                     f.write(struct.pack("<H", tile_y))
