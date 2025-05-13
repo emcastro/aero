@@ -9,7 +9,7 @@ import rasterio
 from rasterio.merge import merge
 from typing import List
 
-BLOCKSIZE = 100
+BLOCKSIZE = 80
 
 
 @click.command()

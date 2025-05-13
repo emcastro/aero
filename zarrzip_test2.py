@@ -1,7 +1,9 @@
 import struct
 import array
 
-path = "devdata/FRnw.zarr.zip"
+from macropython import *
+
+zip_path = "devdata/FRnw.zarr.zip"
 index_path = "devdata/offset_table.bin"
 
 
@@ -73,4 +75,43 @@ table = OffsetTable(index_path)
 print("All data consumed")
 print("Row index:", table.row_index)
 
-print(table.read_row(-1))
+row_parts = table.read_row(76)
+import json
+print(row_parts)
+
+with open(zip_path, "rb") as f:
+    f.seek(row_parts[0]["rowpart_offset"])
+    data = f.read(row_parts[0]["row_parts"][0]["value"])
+print(data[:100])
+
+# Zip
+structFileHeader = "<4s2B4HL2L2H"
+sizeFileHeader = struct.calcsize(structFileHeader)
+header = struct.unpack(structFileHeader, data[:sizeFileHeader])
+
+
+_FH_SIGNATURE = const(0)
+_FH_EXTRACT_VERSION = const(1)
+_FH_EXTRACT_SYSTEM = const(2)
+_FH_GENERAL_PURPOSE_FLAG_BITS = const(3)
+_FH_COMPRESSION_METHOD = const(4)
+_FH_LAST_MOD_TIME = const(5)
+_FH_LAST_MOD_DATE = const(6)
+_FH_CRC = const(7)
+_FH_COMPRESSED_SIZE = const(8)
+_FH_UNCOMPRESSED_SIZE = const(9)
+_FH_FILENAME_LENGTH = const(10)
+_FH_EXTRA_FIELD_LENGTH = const(11)
+
+filename = data[sizeFileHeader:sizeFileHeader + header[_FH_FILENAME_LENGTH]]
+# TODO check if filename is correct
+zarr_data = data[sizeFileHeader + header[_FH_FILENAME_LENGTH]:]
+print("+++++++++++")
+# print(zarr_data)
+print(len(zarr_data))
+print("===============")
+del zarr_data
+del data
+import gc
+gc.collect()
+print(gc.mem_free())
