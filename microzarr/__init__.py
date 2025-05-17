@@ -217,6 +217,7 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
 
 COORDINATE_SIZE = const(8)  # Assume data is in double 64bit
 SEEK_END = const(2)  # os.SEEK_END
+LOAD_WINDOW_SIZE = const(20)  # Number of values to load in the cache in one read
 
 
 class Axis:
@@ -235,7 +236,7 @@ class Axis:
         self.data_file = open(values_path, "rb")  # pylint: disable=R1732
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
 
-        self.cache = LRUCache(math.log2(self.data_size)+4, self.read_item)
+        self.cache = LRUCache(int(math.log2(self.data_size) + LOAD_WINDOW_SIZE), self.read_item)
         # Now that self.data_file, with can use __getitem__ to read the values
         self.standard_orientation = self[0] <= self[self.data_size - 1]
 
@@ -312,31 +313,41 @@ class Axis:
         return self.cache.get(idx)
 
     def read_item(self, idx: int):
-        print("read", idx)
-        self.data_file.seek(idx * COORDINATE_SIZE)
-        time.sleep(SLEEP_TIME)
-        data = struct.unpack("<d", self.data_file.read(8))
-        return data[0]
+        # print("read\t", idx, "\t", self)
+        idx_aligned = idx // LOAD_WINDOW_SIZE * LOAD_WINDOW_SIZE  # Align to LOAD_WINDOW_SIZE
+        self.data_file.seek((idx_aligned * COORDINATE_SIZE))
+        window_size = min(self.data_size - idx_aligned, LOAD_WINDOW_SIZE)
+        # print(window_size)
+        data: List[float] = struct.unpack("<" + "d" * window_size, self.data_file.read(COORDINATE_SIZE * window_size))  # type: ignore
+        return [(idx_datum + idx_aligned, datum) for idx_datum, datum in enumerate(data)]
+
+
+K = int
+V = float
 
 
 class LRUCache:
 
-    def __init__(self, capacity: int, data_loader: callable):
+    def __init__(self, capacity: int, data_loader: Callable[[K], List[Tuple[K, V]]]):
         self.capacity = capacity
         self.cache = collections.OrderedDict()
         self.data_loader = data_loader
 
-    def get(self, key: int):
+    def get(self, key: K) -> V:
         value = self.cache.get(key, None)
         if value:
+            # Move the accessed item to the end of the OrderedDict
             del self.cache[key]
+            self.cache[key] = value
         else:
-            value = self.data_loader(key)
-        self.cache[key] = value
+            values = self.data_loader(key)
+            for k, v in values:
+                self.cache[k] = v
+            value = self.cache[key]
 
         if len(self.cache) > self.capacity:
             lru_key = next(iter(self.cache.keys()))
-            print("drop", lru_key, self)
+            # print("drop", lru_key, self)
             del self.cache[lru_key]
 
         # print("cache", list(self.cache.keys()), key, self)

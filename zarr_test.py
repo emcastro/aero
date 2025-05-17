@@ -3,6 +3,7 @@ from microzarr import Zarr
 from geolib import wgs84_project
 import gc
 
+
 def run():
     """
     This script demonstrates the usage of the Zarr library and the `wgs84_project` function.
@@ -10,13 +11,13 @@ def run():
     """
     tm1 = time.time()
     zarr = Zarr("devdata/FRnw.zarr")
-    gc.collect() # Clean up temp object from Zarr reading
+    gc.collect()  # Clean up temp object from Zarr reading
 
     t0 = time.time()
     x = -0.4561
     y = 49.17617
     result = []
-    for i in range(0,100):
+    for i in range(0, 100):
         x, y = wgs84_project(x, y, 135, 100)
         result.append((x, y, zarr.value_at(x, y)))
     t1 = time.time()
@@ -24,5 +25,8 @@ def run():
         print(*line)
     print("Init      time:", t0 - tm1)
     print("Execution time:", t1 - t0)
+    gc.collect()
+    print("FREE", gc.mem_free())
+
 
 run()
