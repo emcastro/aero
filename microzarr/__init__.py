@@ -1,8 +1,10 @@
+import collections
+import math
 import os
 import json
 import struct
 from macropython import *
-from microtyping import List
+from microtyping import List, Callable, Tuple
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
 
@@ -233,6 +235,7 @@ class Axis:
         self.data_file = open(values_path, "rb")  # pylint: disable=R1732
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
 
+        self.cache = LRUCache(math.log2(self.data_size)+4, self.read_item)
         # Now that self.data_file, with can use __getitem__ to read the values
         self.standard_orientation = self[0] <= self[self.data_size - 1]
 
@@ -306,7 +309,36 @@ class Axis:
         Returns:
             float: The coordinate value at the specified index.
         """
-        # TODO add LRU cache
+        return self.cache.get(idx)
+
+    def read_item(self, idx: int):
+        print("read", idx)
         self.data_file.seek(idx * COORDINATE_SIZE)
+        time.sleep(SLEEP_TIME)
         data = struct.unpack("<d", self.data_file.read(8))
         return data[0]
+
+
+class LRUCache:
+
+    def __init__(self, capacity: int, data_loader: callable):
+        self.capacity = capacity
+        self.cache = collections.OrderedDict()
+        self.data_loader = data_loader
+
+    def get(self, key: int):
+        value = self.cache.get(key, None)
+        if value:
+            del self.cache[key]
+        else:
+            value = self.data_loader(key)
+        self.cache[key] = value
+
+        if len(self.cache) > self.capacity:
+            lru_key = next(iter(self.cache.keys()))
+            print("drop", lru_key, self)
+            del self.cache[lru_key]
+
+        # print("cache", list(self.cache.keys()), key, self)
+
+        return value

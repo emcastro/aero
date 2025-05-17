@@ -22,7 +22,7 @@ def run():
     t1 = time.time()
     for line in result:
         print(*line)
-    print("Int       time:", t0 - tm1)
+    print("Init      time:", t0 - tm1)
     print("Execution time:", t1 - t0)
 
 run()
