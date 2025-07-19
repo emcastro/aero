@@ -17,7 +17,7 @@ do
         done        
 done
 
-OUT_NAME=FRnw
+OUT_NAME=dem
 
 for TILE_NAME in "${TILE_NAMES[@]}"
 do 
