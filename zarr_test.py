@@ -10,7 +10,8 @@ def run():
     It projects a point along a great circle path and retrieves elevation data from a Zarr dataset.
     """
     tm1 = time.time()
-    zarr = Zarr("devdata/FRnw.zarr")
+
+    zarr = Zarr("/sd/dem.zarr")
     gc.collect()  # Clean up temp object from Zarr reading
 
     t0 = time.time()

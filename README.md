@@ -32,3 +32,18 @@ Fun with Zarr v3 (as of QGIS Desktop) in MicroPython
 ```bash
 micropython -v -X heapsize=103936 zarr_test.py
 ```
+
+# Run and Install on STM32
+```bash
+
+
+```bash
+mpremote cp -r  microzarr geolib.py macropython.py microtyping.py :/sd/ 
+```
+Then
+```bash
+mpremote run zarr_test.py 
+```
+
+# Mount
+Note that `mpremote mount . run zarr_test.py` is a bit slow
