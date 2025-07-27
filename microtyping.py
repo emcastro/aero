@@ -11,4 +11,4 @@ if sys.implementation.name == "micropython":
         return None
 
 else:
-    from typing import *
+    from typing import * # type: ignore

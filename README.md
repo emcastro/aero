@@ -16,34 +16,13 @@ Fun with Zarr v3 (as of QGIS Desktop) in MicroPython
   - Reasonably simple
   - Easy to audit using GDAL
 
-## Zip
-- Chunks are 30 pixels by 30 pixels so that they fit in MicroPython's small memory (100KB)
-- Zarr Directory is too big to be comfortable when copying, and waste space
-- We store Zarr chucnks in numerical ordre using a Python script, so that we dont
-  have to store the whole directory structure in memory
-- 
-
 # References
 
 - https://docs.micropython.org/en/latest/library/index.html
 - https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html
 
-# Execution on Linux
-```bash
-micropython -v -X heapsize=103936 zarr_test.py
-```
 
 # Run and Install on STM32
 ```bash
-
-
-```bash
-mpremote cp -r  microzarr geolib.py macropython.py microtyping.py :/sd/ 
+./run.sh zarr_test.py
 ```
-Then
-```bash
-mpremote run zarr_test.py 
-```
-
-# Mount
-Note that `mpremote mount . run zarr_test.py` is a bit slow

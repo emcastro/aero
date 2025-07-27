@@ -1,5 +1,4 @@
 from math import radians, degrees, sin, cos, asin, atan2
-from macropython import *
 
 # Average radius of the Earth in meters
 R = const(6371008.8)

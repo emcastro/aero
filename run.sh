@@ -7,8 +7,8 @@ else
     mpremote=mpremote
 fi
 
-echo Deploy
-$mpremote cp -r  microzarr geolib.py macropython.py microtyping.py :/sd/ 
+echo Deploy libraries
+$mpremote cp -r microzarr geolib.py microtyping.py logging.py :/sd/ 
 
 echo Run
 $mpremote run "$@"

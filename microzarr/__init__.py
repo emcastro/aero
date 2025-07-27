@@ -3,8 +3,9 @@ import math
 import os
 import json
 import struct
-from macropython import *
+import micropython # type: ignore
 from microtyping import List, Callable, Tuple
+import logging
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
 
@@ -36,6 +37,7 @@ class Zarr:  # pylint: disable=R0902
         Raises:
             ZarrError: If the dataset structure is invalid.
         """
+        logging.info("Loading Zarr from %s", path)   
         # Analyze the Zarr structure
         groups = set(os.listdir(path))
 
@@ -101,6 +103,7 @@ class Zarr:  # pylint: disable=R0902
         Returns:
             int: The value at the specified coordinates.
         """
+        logging.debug("Get value at (%.6f, %.6f)", x, y)
         row = self.y_axis.to_idx(y)
         column = self.x_axis.to_idx(x)
 
@@ -129,6 +132,8 @@ class Zarr:  # pylint: disable=R0902
         """
         if self.data_xy == (chunk_id_x, chunk_id_y):
             return
+
+        logging.info("Loading chunk (%d, %d)", chunk_id_x, chunk_id_y)
 
         # Load the chunk data into the buffer
         with open(f"{self.path}/{self.main_group}/c/{chunk_id_y}/{chunk_id_x}", "rb") as file:
@@ -232,7 +237,10 @@ class Axis:
     """
 
     def __init__(self, values_path: str):
+        logging.info("Loading axis from %s", values_path)
+        
         # Open the file containing the coordinate values, and leave it open
+        self.values_path = values_path
         self.data_file = open(values_path, "rb")  # pylint: disable=R1732
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
 
@@ -313,11 +321,11 @@ class Axis:
         return self.cache.get(idx)
 
     def read_item(self, idx: int):
-        # print("read\t", idx, "\t", self)
+        logging.debug("Reading axis item at index %d from %s", idx, self.values_path)
         idx_aligned = idx // LOAD_WINDOW_SIZE * LOAD_WINDOW_SIZE  # Align to LOAD_WINDOW_SIZE
         self.data_file.seek((idx_aligned * COORDINATE_SIZE))
         window_size = min(self.data_size - idx_aligned, LOAD_WINDOW_SIZE)
-        # print(window_size)
+
         data: List[float] = struct.unpack("<" + "d" * window_size, self.data_file.read(COORDINATE_SIZE * window_size))  # type: ignore
         return [(idx_datum + idx_aligned, datum) for idx_datum, datum in enumerate(data)]
 
@@ -332,13 +340,17 @@ class LRUCache:
         self.capacity = capacity
         self.cache = collections.OrderedDict()
         self.data_loader = data_loader
+        self.hits = 0
+        self.reads = 0
 
     def get(self, key: K) -> V:
+        self.reads += 1
         value = self.cache.get(key, None)
         if value:
             # Move the accessed item to the end of the OrderedDict
             del self.cache[key]
             self.cache[key] = value
+            self.hits += 1
         else:
             values = self.data_loader(key)
             for k, v in values:
@@ -347,9 +359,11 @@ class LRUCache:
 
         if len(self.cache) > self.capacity:
             lru_key = next(iter(self.cache.keys()))
-            # print("drop", lru_key, self)
             del self.cache[lru_key]
 
-        # print("cache", list(self.cache.keys()), key, self)
+        if self.reads % 1000 == 0:
+            print(f"Cache hits: {self.hits}, reads: {self.reads}, hit rate: {self.hits / self.reads:.2%}")
+            self.reads = 0
+            self.hits = 0
 
         return value
