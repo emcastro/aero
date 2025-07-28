@@ -5,7 +5,7 @@ R = const(6371008.8)
 
 # Projects a point from lat/lon on the great circle with azimuth alpha (in degrees)
 # at a distance (in meters)
-def wgs84_project(lon, lat, azimuth, distance):
+def wgs84_project(lon: float, lat: float, azimuth: float, distance:float):
     """
     Projects a point from latitude/longitude along a great circle path with a given azimuth and distance.
 

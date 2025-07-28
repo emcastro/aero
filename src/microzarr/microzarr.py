@@ -3,9 +3,9 @@ import math
 import os
 import json
 import struct
-import micropython  # type: ignore
+import micropython
 from microtyping import List, Callable, Tuple
-import logging
+import ulogging
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
 
@@ -37,7 +37,7 @@ class Zarr:  # pylint: disable=R0902
         Raises:
             ZarrError: If the dataset structure is invalid.
         """
-        logging.info("Loading Zarr from %s", path)
+        ulogging.info("Loading Zarr from %s", path)
         # Analyze the Zarr structure
         groups = set(os.listdir(path))
 
@@ -103,7 +103,7 @@ class Zarr:  # pylint: disable=R0902
         Returns:
             int: The value at the specified coordinates.
         """
-        logging.debug("Get value at (%.6f, %.6f)", x, y)
+        ulogging.debug("Get value at (%.6f, %.6f)", x, y)
         row = self.y_axis.to_idx(y)
         column = self.x_axis.to_idx(x)
 
@@ -133,7 +133,7 @@ class Zarr:  # pylint: disable=R0902
         if self.data_xy == (chunk_id_x, chunk_id_y):
             return
 
-        logging.info("Loading chunk (%d, %d)", chunk_id_x, chunk_id_y)
+        ulogging.info("Loading chunk (%d, %d)", chunk_id_x, chunk_id_y)
 
         # Load the chunk data into the buffer
         with open(f"{self.path}/{self.main_group}/c/{chunk_id_y}/{chunk_id_x}", "rb") as file:
@@ -237,7 +237,7 @@ class Axis:
     """
 
     def __init__(self, values_path: str):
-        logging.info("Loading axis from %s", values_path)
+        ulogging.info("Loading axis from %s", values_path)
 
         # Open the file containing the coordinate values, and leave it open
         self.values_path = values_path
@@ -325,7 +325,7 @@ class Axis:
     def read_item(self, idx: int):
         idx_aligned = idx // LOAD_WINDOW_SIZE * LOAD_WINDOW_SIZE  # Align to LOAD_WINDOW_SIZE
         window_size = min(self.data_size - idx_aligned, LOAD_WINDOW_SIZE)
-        logging.debug("Reading axis item for indices %d-%d from %s", idx_aligned, idx_aligned + window_size - 1, self.values_path)
+        ulogging.debug("Reading axis item for indices %d-%d from %s", idx_aligned, idx_aligned + window_size - 1, self.values_path)
         self.data_file.seek((idx_aligned * COORDINATE_SIZE))
 
         data: List[float] = struct.unpack("<" + "d" * window_size, self.data_file.read(COORDINATE_SIZE * window_size))  # type: ignore
@@ -365,7 +365,7 @@ class LRUCache:
             del self.cache[lru_key]
 
         if self.reads % 1000 == 0:
-            logging.info(
+            ulogging.info(
                 "Cache [%s] hits: %s, reads: %s, hit rate: %.2f%%",
                 self.name,
                 self.hits,

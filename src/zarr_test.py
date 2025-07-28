@@ -3,8 +3,10 @@ from microzarr import Zarr
 from geolib import wgs84_project
 import gc
 
-import logging
-logging.basicConfig(level=logging.DEBUG, format="%(chrono)s:%(levelname)-7s:%(name)s:%(message)s")
+import ulogging
+
+ulogging.basicConfig(level=ulogging.DEBUG, format="%(chrono)s:%(levelname)-7s:%(name)s:%(message)s")
+# ulogging.basicConfig(level=ulogging.CRITICAL, format="%(chrono)s:%(levelname)-7s:%(name)s:%(message)s")
 
 
 def run():
@@ -30,7 +32,7 @@ def run():
     print("Init      time:", time.ticks_diff(t0, tm1))
     print("Execution time:", time.ticks_diff(t1, t0))
     gc.collect()
-    print("FREE", gc.mem_free()) # type: ignore
+    print("FREE", gc.mem_free())
 
 
 run()
