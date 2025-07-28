@@ -1,6 +1,6 @@
 import builtins
 import sys
-import debugpy
+import debugpy  # type: ignore
 
 # Listen on all interfaces so that it works in Docker
 debugpy.listen(("0.0.0.0", 5678))
@@ -12,7 +12,7 @@ def const(value):
     return value
 
 
-builtins.const = const
+builtins.const = const  # type: ignore
 
 script_path = sys.argv[1]
 with open(script_path, "r") as f:

@@ -1,6 +1,3 @@
-import struct
-import json
-
 import click
 import rasterio
 from rasterio.merge import merge

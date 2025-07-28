@@ -2,7 +2,7 @@
 
 import sys
 
-if sys.implementation.name == "micropython":
+if sys.implementation.name == "micropython":  # type: ignore
     List = None
     Tuple = None
     Callable = None
@@ -11,4 +11,4 @@ if sys.implementation.name == "micropython":
         return None
 
 else:
-    from typing import * # type: ignore
+    from typing import *  # type: ignore
