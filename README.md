@@ -24,5 +24,5 @@ Fun with Zarr v3 (as of QGIS Desktop) in MicroPython
 
 # Run and Install on STM32
 ```bash
-./run.sh zarr_test.py
+./run_remote.sh zarr_test.py
 ```
