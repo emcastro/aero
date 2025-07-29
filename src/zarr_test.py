@@ -5,8 +5,8 @@ import gc
 
 import ulogging
 
-ulogging.basicConfig(level=ulogging.DEBUG, format="%(chrono)s:%(levelname)-7s:%(name)s:%(message)s")
-# ulogging.basicConfig(level=ulogging.CRITICAL, format="%(chrono)s:%(levelname)-7s:%(name)s:%(message)s")
+# ulogging.basicConfig(level=ulogging.DEBUG, format="%(levelname)-7s:%(name)s:%(message)s")
+ulogging.basicConfig(level=ulogging.CRITICAL, format="%(chrono)s:%(levelname)-7s:%(name)s:%(message)s")
 
 
 def run():
@@ -30,9 +30,12 @@ def run():
     for line in result:
         print(*line)
     print("Init      time:", time.ticks_diff(t0, tm1))
-    print("Execution time:", time.ticks_diff(t1, t0))
+    print("Execution time:", exec_time := time.ticks_diff(t1, t0))
+    print("FREE1", gc.mem_free())
     gc.collect()
-    print("FREE", gc.mem_free())
+    print("FREE2", gc.mem_free())
+    return exec_time
 
 
-run()
+if __name__ == "__main__":
+    run()

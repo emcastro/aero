@@ -222,7 +222,7 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
 
 COORDINATE_SIZE = const(8)  # Assume data is in double 64bit
 SEEK_END = const(2)  # os.SEEK_END
-LOAD_WINDOW_SIZE = const(20)  # Number of values to load in the cache in one read
+LOAD_WINDOW_SIZE = const(4)  # Number of values to load in the cache in one read
 
 
 class Axis:
@@ -244,9 +244,14 @@ class Axis:
         self.data_file = open(values_path, "rb")  # pylint: disable=R1732
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
 
+        # print("CACHE_SIZE", CACHE_SIZE, "LOAD_WINDOW_SIZE", LOAD_WINDOW_SIZE)
         self.cache = LRUCache(
-            int(math.log2(self.data_size) + LOAD_WINDOW_SIZE), self.read_item, name=f"Axis {values_path}"
+            int(math.log2(self.data_size)) + 2 * LOAD_WINDOW_SIZE,
+            self.read_item,
+            name=f"Axis {values_path}",
+            # CACHE_SIZE, self.read_item, name=f"Axis {values_path}"
         )
+        print("===========", self.cache.capacity, LOAD_WINDOW_SIZE)
         # Now that self.data_file, with can use __getitem__ to read the values
         self.standard_orientation = self[0] <= self[self.data_size - 1]
 
@@ -325,7 +330,13 @@ class Axis:
     def read_item(self, idx: int):
         idx_aligned = idx // LOAD_WINDOW_SIZE * LOAD_WINDOW_SIZE  # Align to LOAD_WINDOW_SIZE
         window_size = min(self.data_size - idx_aligned, LOAD_WINDOW_SIZE)
-        ulogging.debug("Reading axis item for indices %d-%d from %s", idx_aligned, idx_aligned + window_size - 1, self.values_path)
+        ulogging.debug(
+            "Reading axis item for indices %d-%d(%d) from %s",
+            idx_aligned,
+            idx_aligned + window_size - 1,
+            idx,
+            self.values_path,
+        )
         self.data_file.seek((idx_aligned * COORDINATE_SIZE))
 
         data: List[float] = struct.unpack("<" + "d" * window_size, self.data_file.read(COORDINATE_SIZE * window_size))  # type: ignore
