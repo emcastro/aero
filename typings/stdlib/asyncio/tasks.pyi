@@ -88,7 +88,9 @@ ALL_COMPLETED = concurrent.futures.ALL_COMPLETED
 if sys.version_info >= (3, 13):
     class _SyncAndAsyncIterator(Iterator[_T_co], AsyncIterator[_T_co], Protocol[_T_co]): ...
 
-    def as_completed(fs: Iterable[_FutureLike[_T]], *, timeout: float | None = None) -> _SyncAndAsyncIterator[Future[_T]]: ...
+    def as_completed(
+        fs: Iterable[_FutureLike[_T]], *, timeout: float | None = None
+    ) -> _SyncAndAsyncIterator[Future[_T]]: ...
 
 elif sys.version_info >= (3, 10):
     def as_completed(fs: Iterable[_FutureLike[_T]], *, timeout: float | None = None) -> Iterator[Future[_T]]: ...
@@ -168,7 +170,9 @@ if sys.version_info >= (3, 10):
     @overload
     def gather(*coros_or_futures: _FutureLike[_T], return_exceptions: Literal[False] = False) -> Future[list[_T]]: ...  # type: ignore[overload-overlap]
     @overload
-    def gather(coro_or_future1: _FutureLike[_T1], /, *, return_exceptions: bool) -> Future[tuple[_T1 | BaseException]]: ...
+    def gather(
+        coro_or_future1: _FutureLike[_T1], /, *, return_exceptions: bool
+    ) -> Future[tuple[_T1 | BaseException]]: ...
     @overload
     def gather(
         coro_or_future1: _FutureLike[_T1],
@@ -406,7 +410,9 @@ else:
 
 if sys.version_info >= (3, 11):
     @overload
-    async def wait(fs: Iterable[_FT], *, timeout: float | None = None, return_when: str = "ALL_COMPLETED") -> tuple[set[_FT], set[_FT]]: ...
+    async def wait(
+        fs: Iterable[_FT], *, timeout: float | None = None, return_when: str = "ALL_COMPLETED"
+    ) -> tuple[set[_FT], set[_FT]]: ...
     @overload
     async def wait(
         fs: Iterable[Task[_T]], *, timeout: float | None = None, return_when: str = "ALL_COMPLETED"
@@ -453,7 +459,9 @@ else:
 def all_tasks(loop: AbstractEventLoop | None = None) -> set[Task[Any]]: ...
 
 if sys.version_info >= (3, 11):
-    def create_task(coro: _CoroutineLike[_T], *, name: str | None = None, context: Context | None = None) -> Task[_T]: ...
+    def create_task(
+        coro: _CoroutineLike[_T], *, name: str | None = None, context: Context | None = None
+    ) -> Task[_T]: ...
 
 else:
     def create_task(coro: _CoroutineLike[_T], *, name: str | None = None) -> Task[_T]: ...

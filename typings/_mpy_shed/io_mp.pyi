@@ -18,10 +18,11 @@ from .buffer_mp import AnyReadableBuf, AnyWritableBuf
 from .pathlike import PathLike
 
 class IOBase_mp(_IOBase, metaclass=abc.ABCMeta): ...
+
 # class IOBase_mp(Stream, metaclass=abc.ABCMeta): ...
 
 # Andy
-# 
+#
 # class Stream(metaclass=abc.ABCMeta):
 #     """
 #     MicroPython stream "base class". Due to implementation mechanism

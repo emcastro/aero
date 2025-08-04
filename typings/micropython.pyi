@@ -119,6 +119,7 @@ def heap_lock() -> int:
     requires ``MICROPY_PY_MICROPYTHON_HEAP_LOCKED``.
     """
     ...
+
 def heap_unlock() -> int:
     """
     Unlock the heap.  When locked no memory allocation can occur and a
@@ -140,6 +141,7 @@ def heap_unlock() -> int:
     requires ``MICROPY_PY_MICROPYTHON_HEAP_LOCKED``.
     """
     ...
+
 def heap_locked() -> bool:
     """
     Both `heap_unlock()` and `heap_locked()` return the current lock depth

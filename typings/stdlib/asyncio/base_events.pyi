@@ -6,7 +6,14 @@ from asyncio.events import AbstractEventLoop, AbstractServer, Handle, TimerHandl
 from asyncio.futures import Future
 from asyncio.protocols import BaseProtocol
 from asyncio.tasks import Task
-from asyncio.transports import BaseTransport, DatagramTransport, ReadTransport, SubprocessTransport, Transport, WriteTransport
+from asyncio.transports import (
+    BaseTransport,
+    DatagramTransport,
+    ReadTransport,
+    SubprocessTransport,
+    Transport,
+    WriteTransport,
+)
 from collections.abc import Callable, Iterable, Sequence
 from contextvars import Context  # type: ignore
 from socket import AddressFamily, SocketKind, _Address, _RetAddress, socket
@@ -106,7 +113,9 @@ class BaseEventLoop(AbstractEventLoop):
         proto: int = 0,
         flags: int = 0,
     ) -> list[tuple[AddressFamily, SocketKind, int, str, tuple[str, int] | tuple[str, int, int, int]]]: ...
-    async def getnameinfo(self, sockaddr: tuple[str, int] | tuple[str, int, int, int], flags: int = 0) -> tuple[str, str]: ...
+    async def getnameinfo(
+        self, sockaddr: tuple[str, int] | tuple[str, int, int, int], flags: int = 0
+    ) -> tuple[str, str]: ...
     if sys.version_info >= (3, 12):
         @overload
         async def create_connection(
@@ -383,7 +392,13 @@ class BaseEventLoop(AbstractEventLoop):
         self, sock: socket, file: IO[bytes], offset: int = 0, count: int | None = None, *, fallback: bool | None = True
     ) -> int: ...
     async def sendfile(
-        self, transport: WriteTransport, file: IO[bytes], offset: int = 0, count: int | None = None, *, fallback: bool = True
+        self,
+        transport: WriteTransport,
+        file: IO[bytes],
+        offset: int = 0,
+        count: int | None = None,
+        *,
+        fallback: bool = True,
     ) -> int: ...
     if sys.version_info >= (3, 11):
         async def create_datagram_endpoint(  # type: ignore[override]
@@ -415,8 +430,12 @@ class BaseEventLoop(AbstractEventLoop):
             sock: socket | None = None,
         ) -> tuple[DatagramTransport, _ProtocolT]: ...
     # Pipes and subprocesses.
-    async def connect_read_pipe(self, protocol_factory: Callable[[], _ProtocolT], pipe: Any) -> tuple[ReadTransport, _ProtocolT]: ...
-    async def connect_write_pipe(self, protocol_factory: Callable[[], _ProtocolT], pipe: Any) -> tuple[WriteTransport, _ProtocolT]: ...
+    async def connect_read_pipe(
+        self, protocol_factory: Callable[[], _ProtocolT], pipe: Any
+    ) -> tuple[ReadTransport, _ProtocolT]: ...
+    async def connect_write_pipe(
+        self, protocol_factory: Callable[[], _ProtocolT], pipe: Any
+    ) -> tuple[WriteTransport, _ProtocolT]: ...
     async def subprocess_shell(
         self,
         protocol_factory: Callable[[], _ProtocolT],
@@ -448,9 +467,13 @@ class BaseEventLoop(AbstractEventLoop):
         errors: None = None,
         **kwargs: Any,
     ) -> tuple[SubprocessTransport, _ProtocolT]: ...
-    def add_reader(self, fd: FileDescriptorLike, callback: Callable[[Unpack[_Ts]], Any], *args: Unpack[_Ts]) -> None: ...
+    def add_reader(
+        self, fd: FileDescriptorLike, callback: Callable[[Unpack[_Ts]], Any], *args: Unpack[_Ts]
+    ) -> None: ...
     def remove_reader(self, fd: FileDescriptorLike) -> bool: ...
-    def add_writer(self, fd: FileDescriptorLike, callback: Callable[[Unpack[_Ts]], Any], *args: Unpack[_Ts]) -> None: ...
+    def add_writer(
+        self, fd: FileDescriptorLike, callback: Callable[[Unpack[_Ts]], Any], *args: Unpack[_Ts]
+    ) -> None: ...
     def remove_writer(self, fd: FileDescriptorLike) -> bool: ...
     # The sock_* methods (and probably some others) are not actually implemented on
     # BaseEventLoop, only on subclasses. We list them here for now for convenience.
@@ -461,7 +484,9 @@ class BaseEventLoop(AbstractEventLoop):
     async def sock_accept(self, sock: socket) -> tuple[socket, _RetAddress]: ...
     if sys.version_info >= (3, 11):
         async def sock_recvfrom(self, sock: socket, bufsize: int) -> tuple[bytes, _RetAddress]: ...
-        async def sock_recvfrom_into(self, sock: socket, buf: WriteableBuffer, nbytes: int = 0) -> tuple[int, _RetAddress]: ...
+        async def sock_recvfrom_into(
+            self, sock: socket, buf: WriteableBuffer, nbytes: int = 0
+        ) -> tuple[int, _RetAddress]: ...
         async def sock_sendto(self, sock: socket, data: ReadableBuffer, address: _Address) -> int: ...
     # Signal handling.
     def add_signal_handler(self, sig: int, callback: Callable[[Unpack[_Ts]], Any], *args: Unpack[_Ts]) -> None: ...

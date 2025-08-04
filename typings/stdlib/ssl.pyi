@@ -169,7 +169,9 @@ if sys.version_info < (3, 12):
 def cert_time_to_seconds(cert_time: str) -> int: ...
 
 if sys.version_info >= (3, 10):
-    def get_server_certificate(addr: tuple[str, int], ssl_version: int = ..., ca_certs: str | None = None, timeout: float = ...) -> str: ...
+    def get_server_certificate(
+        addr: tuple[str, int], ssl_version: int = ..., ca_certs: str | None = None, timeout: float = ...
+    ) -> str: ...
 
 else:
     def get_server_certificate(addr: tuple[str, int], ssl_version: int = ..., ca_certs: str | None = None) -> str: ...
@@ -353,8 +355,18 @@ class _ASN1Object(_ASN1ObjectBase):
     def fromname(cls, name: str) -> Self: ...
 
 class Purpose(_ASN1Object, enum.Enum):
-    SERVER_AUTH = (129, "serverAuth", "TLS Web Server Authentication", "1.3.6.1.5.5.7.3.2")  # pyright: ignore[reportCallIssue]
-    CLIENT_AUTH = (130, "clientAuth", "TLS Web Client Authentication", "1.3.6.1.5.5.7.3.1")  # pyright: ignore[reportCallIssue]
+    SERVER_AUTH = (
+        129,
+        "serverAuth",
+        "TLS Web Server Authentication",
+        "1.3.6.1.5.5.7.3.2",
+    )  # pyright: ignore[reportCallIssue]
+    CLIENT_AUTH = (
+        130,
+        "clientAuth",
+        "TLS Web Client Authentication",
+        "1.3.6.1.5.5.7.3.1",
+    )  # pyright: ignore[reportCallIssue]
 
 class SSLSocket:
     context: SSLContext
@@ -372,7 +384,9 @@ class SSLSocket:
     @overload  # force merge
     def recv_into(self, *argv, **kwargs) -> Incomplete: ...
     def recvfrom(self, buflen: int = 1024, flags: int = 0) -> tuple[bytes, socket._RetAddress]: ...
-    def recvfrom_into(self, buffer: WriteableBuffer, nbytes: int | None = None, flags: int = 0) -> tuple[int, socket._RetAddress]: ...
+    def recvfrom_into(
+        self, buffer: WriteableBuffer, nbytes: int | None = None, flags: int = 0
+    ) -> tuple[int, socket._RetAddress]: ...
     @overload  # force merge
     def send(self, *argv, **kwargs) -> Incomplete: ...
     @overload  # force merge

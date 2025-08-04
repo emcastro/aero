@@ -8,5 +8,6 @@ CPython module: :mod:`python:collections` https://docs.python.org/3/library/coll
 This module implements advanced collection and container types to
 hold/accumulate various objects.
 """
+
 # import module from stdlib/module
 from collections import *

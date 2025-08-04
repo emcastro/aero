@@ -106,7 +106,15 @@ if sys.version_info >= (3, 9):
     __all__ += ["Annotated", "BinaryIO", "IO", "Match", "Pattern", "TextIO"]
 
 if sys.version_info >= (3, 10):
-    __all__ += ["Concatenate", "ParamSpec", "ParamSpecArgs", "ParamSpecKwargs", "TypeAlias", "TypeGuard", "is_typeddict"]
+    __all__ += [
+        "Concatenate",
+        "ParamSpec",
+        "ParamSpecArgs",
+        "ParamSpecKwargs",
+        "TypeAlias",
+        "TypeGuard",
+        "is_typeddict",
+    ]
 
 if sys.version_info >= (3, 11):
     __all__ += [
@@ -175,7 +183,12 @@ class TypeVar:
         ) -> None: ...
     else:
         def __init__(
-            self, name: str, *constraints: Any, bound: Any | None = None, covariant: bool = False, contravariant: bool = False
+            self,
+            name: str,
+            *constraints: Any,
+            bound: Any | None = None,
+            covariant: bool = False,
+            contravariant: bool = False,
         ) -> None: ...
     if sys.version_info >= (3, 10):
         def __or__(self, right: Any) -> _SpecialForm: ...
@@ -292,7 +305,9 @@ if sys.version_info >= (3, 10):
                 infer_variance: bool = False,
             ) -> None: ...
         else:
-            def __init__(self, name: str, *, bound: Any | None = None, contravariant: bool = False, covariant: bool = False) -> None: ...
+            def __init__(
+                self, name: str, *, bound: Any | None = None, contravariant: bool = False, covariant: bool = False
+            ) -> None: ...
 
         @property
         def args(self) -> ParamSpecArgs: ...
@@ -454,7 +469,9 @@ class Generator(Iterator[_YieldT_co], Generic[_YieldT_co, _SendT_contra, _Return
     def send(self, value: _SendT_contra, /) -> _YieldT_co: ...
     @overload
     @abstractmethod
-    def throw(self, typ: type[BaseException], val: BaseException | object = None, tb: TracebackType | None = None, /) -> _YieldT_co: ...
+    def throw(
+        self, typ: type[BaseException], val: BaseException | object = None, tb: TracebackType | None = None, /
+    ) -> _YieldT_co: ...
     @overload
     @abstractmethod
     def throw(self, typ: BaseException, val: None = None, tb: TracebackType | None = None, /) -> _YieldT_co: ...
@@ -505,7 +522,9 @@ class Coroutine(Awaitable[_ReturnT_co_nd], Generic[_YieldT_co, _SendT_contra_nd,
     def send(self, value: _SendT_contra_nd, /) -> _YieldT_co: ...
     @overload
     @abstractmethod
-    def throw(self, typ: type[BaseException], val: BaseException | object = None, tb: TracebackType | None = None, /) -> _YieldT_co: ...
+    def throw(
+        self, typ: type[BaseException], val: BaseException | object = None, tb: TracebackType | None = None, /
+    ) -> _YieldT_co: ...
     @overload
     @abstractmethod
     def throw(self, typ: BaseException, val: None = None, tb: TracebackType | None = None, /) -> _YieldT_co: ...
@@ -544,7 +563,9 @@ class AsyncGenerator(AsyncIterator[_YieldT_co], Generic[_YieldT_co, _SendT_contr
     ) -> Coroutine[Any, Any, _YieldT_co]: ...
     @overload
     @abstractmethod
-    def athrow(self, typ: BaseException, val: None = None, tb: TracebackType | None = None, /) -> Coroutine[Any, Any, _YieldT_co]: ...
+    def athrow(
+        self, typ: BaseException, val: None = None, tb: TracebackType | None = None, /
+    ) -> Coroutine[Any, Any, _YieldT_co]: ...
     def aclose(self) -> Coroutine[Any, Any, None]: ...
     @property
     def ag_await(self) -> Any: ...
@@ -797,7 +818,7 @@ class IO(Generic[AnyStr]):
     @overload
     def write(self, s: AnyStr, /) -> int: ...
     @abstractmethod
-    @overload # write(bytes)
+    @overload  # write(bytes)
     def write(self, s: bytes, /) -> int: ...
     @abstractmethod
     @overload
@@ -812,7 +833,9 @@ class IO(Generic[AnyStr]):
     @abstractmethod
     def __enter__(self) -> IO[AnyStr]: ...
     @abstractmethod
-    def __exit__(self, type: type[BaseException] | None, value: BaseException | None, traceback: TracebackType | None, /) -> None: ...
+    def __exit__(
+        self, type: type[BaseException] | None, value: BaseException | None, traceback: TracebackType | None, /
+    ) -> None: ...
 
 class BinaryIO(IO[bytes]):
     @abstractmethod
@@ -860,7 +883,9 @@ if sys.version_info >= (3, 9):
 
 else:
     def get_type_hints(
-        obj: _get_type_hints_obj_allowed_types, globalns: dict[str, Any] | None = None, localns: Mapping[str, Any] | None = None
+        obj: _get_type_hints_obj_allowed_types,
+        globalns: dict[str, Any] | None = None,
+        localns: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]: ...
 
 def get_args(tp: Any) -> tuple[Any, ...]: ...
@@ -976,7 +1001,9 @@ class ForwardRef:
     __forward_module__: Any | None
     if sys.version_info >= (3, 9):
         # The module and is_class arguments were added in later Python 3.9 versions.
-        def __init__(self, arg: str, is_argument: bool = True, module: Any | None = None, *, is_class: bool = False) -> None: ...
+        def __init__(
+            self, arg: str, is_argument: bool = True, module: Any | None = None, *, is_class: bool = False
+        ) -> None: ...
     else:
         def __init__(self, arg: str, is_argument: bool = True) -> None: ...
 
@@ -1030,7 +1057,9 @@ if sys.version_info >= (3, 12):
     def override(method: _F, /) -> _F: ...
     @final
     class TypeAliasType:
-        def __init__(self, name: str, value: Any, *, type_params: tuple[TypeVar | ParamSpec | TypeVarTuple, ...] = ()) -> None: ...
+        def __init__(
+            self, name: str, value: Any, *, type_params: tuple[TypeVar | ParamSpec | TypeVarTuple, ...] = ()
+        ) -> None: ...
         @property
         def __value__(self) -> Any: ...
         @property
