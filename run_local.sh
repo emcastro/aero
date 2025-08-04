@@ -8,9 +8,10 @@ shift
 # Launches execution in a temporary micropython/unix container
 # data directory mounted on /sd/
 # code directory mounted on /flash/
-docker run --rm -it \
-    -v "$DIR/devdata:/sd" \
-    -v "$DIR/src:/flash" \
-    -w /flash \
+docker run --rm  --interactive --tty \
+    --volume "$DIR/devdata:/sd" \
+    --volume "$DIR/src:/flash" \
+    --user "$(id -u "$USER"):$(id -g "$USER")" \
+    --workdir /flash \
     micropython/unix \
-    /usr/local/bin/micropython "$SCRIPT" "$@" | sed s:/flash:"$DIR/src":
+    /usr/local/bin/micropython -X heapsize=103936 "$SCRIPT" "$@" | sed s:/flash:"$DIR/src":
