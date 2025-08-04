@@ -12,13 +12,7 @@ INFO = const(20)
 DEBUG = const(10)
 NOTSET = const(0)
 
-_level_str = {
-    CRITICAL: "CRITICAL",
-    ERROR: "ERROR",
-    WARNING: "WARNING",
-    INFO: "INFO",
-    DEBUG: "DEBUG"
-}
+_level_str = {CRITICAL: "CRITICAL", ERROR: "ERROR", WARNING: "WARNING", INFO: "INFO", DEBUG: "DEBUG"}
 
 _stream = sys.stderr  # default output
 _filename = None  # overrides stream
@@ -26,13 +20,14 @@ _level = INFO  # ignore messages which are less severe
 _format = "%(levelname)s:%(name)s:%(message)s"  # default message format
 _loggers = dict()
 
+start_ms = time.ticks_ms()
+
 
 class Logger:
 
     def __init__(self, name):
         self.name = name
         self.level = _level
-        self.start_ms = time.ticks_ms()
 
     def log(self, level, message, *args):
         if level < self.level:
@@ -48,9 +43,10 @@ class Logger:
             record["message"] = message
             record["name"] = self.name
             tm = time.localtime()
-            record["asctime"] = "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}" \
-                .format(tm[0], tm[1], tm[2], tm[3], tm[4], tm[5])
-            record["chrono"] = "{:f}".format(time.ticks_diff(time.ticks_ms(),self.start_ms)/1000)
+            record["asctime"] = "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
+                tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]
+            )
+            record["chrono"] = "{:f}".format(time.ticks_diff(time.ticks_ms(), start_ms) / 1000)
 
             log_str = _format % record + "\n"
 
@@ -102,7 +98,7 @@ def getLogger(name="root"):
     return _loggers[name]
 
 
-def basicConfig(level=INFO, filename=None, filemode='a', format=None):
+def basicConfig(level=INFO, filename=None, filemode="a", format=None):
     global _filename, _level, _format
     _filename = filename
     _level = level
@@ -114,29 +110,36 @@ def basicConfig(level=INFO, filename=None, filemode='a', format=None):
             pass  # clear log file
 
 
+# TODO @deprecated
 def setLevel(level):
     getLogger().setLevel(level)
 
 
+# TODO @deprecated
 def debug(message, *args):
     getLogger().debug(message, *args)
 
 
+# TODO @deprecated
 def info(message, *args):
     getLogger().info(message, *args)
 
 
+# TODO @deprecated
 def warning(message, *args):
     getLogger().warning(message, *args)
 
 
+# TODO @deprecated
 def error(message, *args):
     getLogger().error(message, *args)
 
 
+# TODO @deprecated
 def critical(message, *args):
     getLogger().critical(message, *args)
 
 
+# TODO @deprecated
 def exception(exception, message, *args):
     getLogger().exception(exception, message, *args)

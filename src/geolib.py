@@ -3,9 +3,10 @@ from math import radians, degrees, sin, cos, asin, atan2
 # Average radius of the Earth in meters
 R = const(6371008.8)
 
+
 # Projects a point from lat/lon on the great circle with azimuth alpha (in degrees)
 # at a distance (in meters)
-def wgs84_project(lon: float, lat: float, azimuth: float, distance:float):
+def wgs84_project(lon: float, lat: float, azimuth: float, distance: float):
     """
     Projects a point from latitude/longitude along a great circle path with a given azimuth and distance.
 

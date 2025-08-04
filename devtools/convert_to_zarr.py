@@ -32,7 +32,7 @@ def gdal_aero_zarr(out, sources):
 
     with rasterio.open(f"{out}", "w", **out_meta) as dest:
         dest.write(mosaic)
-    
+
     print("Done")
 
 
@@ -46,6 +46,7 @@ def natural_sort_key(value: str):
     if value.isdigit():
         return int(value)
     return value
+
 
 if __name__ == "__main__":
     gdal_aero_zarr()
