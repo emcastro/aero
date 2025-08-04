@@ -3,11 +3,12 @@
 import sys
 
 if sys.implementation.name == "micropython":  # type: ignore
+    # pylint: disable=invalid-name
     List = None
     Tuple = None
     Callable = None
 
-    def TypeVar(name):
+    def TypeVar(name):  # pylint: disable=unused-argument
         return None
 
 else:

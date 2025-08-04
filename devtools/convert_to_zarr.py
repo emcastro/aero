@@ -1,7 +1,6 @@
 import click
 import rasterio
 from rasterio.merge import merge
-from typing import List
 
 BLOCKSIZE = 80
 
@@ -49,4 +48,4 @@ def natural_sort_key(value: str):
 
 
 if __name__ == "__main__":
-    gdal_aero_zarr()
+    gdal_aero_zarr()  # pylint: disable=no-value-for-parameter

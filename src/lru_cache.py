@@ -1,9 +1,12 @@
 import collections
 from microtyping import List, Callable, Tuple
+import ulogging
 
 # Simulate type variables for type hints
 K = int
 V = float
+
+logger = ulogging.getLogger("LRUCache")
 
 
 class LRUCache:
@@ -35,8 +38,7 @@ class LRUCache:
             del self.cache[lru_key]
 
         if self.reads % 1000 == 0:
-            ulogging.info(
-                "LRUCache",
+            logger.info(
                 "Cache [%s] hits: %s, reads: %s, hit rate: %.2f%%",
                 self.name,
                 self.hits,

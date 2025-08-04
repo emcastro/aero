@@ -1,35 +1,42 @@
 # logging.py - A simple logging module for MicroPython
-# Source: https://github.com/erikdelange/MicroPython-Logging
+# Original source: https://github.com/erikdelange/MicroPython-Logging
 # Licence: https://raw.githubusercontent.com/erikdelange/MicroPython-Logging/refs/heads/main/LICENSE
+
+# pylint: disable=invalid-name
 
 import sys
 import time
 
+NOLOG = const(100)
 CRITICAL = const(50)
 ERROR = const(40)
 WARNING = const(30)
 INFO = const(20)
 DEBUG = const(10)
-NOTSET = const(0)
 
 _level_str = {CRITICAL: "CRITICAL", ERROR: "ERROR", WARNING: "WARNING", INFO: "INFO", DEBUG: "DEBUG"}
 
 _stream = sys.stderr  # default output
 _filename = None  # overrides stream
-_level = INFO  # ignore messages which are less severe
+_level = WARNING  # ignore messages which are less severe
 _format = "%(levelname)s:%(name)s:%(message)s"  # default message format
-_loggers = dict()
+_loggers = {}
 
-start_ms = time.ticks_ms()
+_start_ms = time.ticks_ms()
 
 
 class Logger:
 
     def __init__(self, name):
+        self.inited = False
         self.name = name
         self.level = _level
 
     def log(self, level, message, *args):
+        if not self.inited:
+            self.inited = True
+            self.level = _level
+
         if level < self.level:
             return
 
@@ -37,16 +44,14 @@ class Logger:
             if args:
                 message = message % args
 
-            record = dict()
+            record = {}
             record["levelname"] = _level_str.get(level, str(level))
             record["level"] = level
             record["message"] = message
             record["name"] = self.name
             tm = time.localtime()
-            record["asctime"] = "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
-                tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]
-            )
-            record["chrono"] = "{:f}".format(time.ticks_diff(time.ticks_ms(), start_ms) / 1000)
+            record["asctime"] = f"{tm[0]:04d}-{tm[1]:02d}-{tm[2]:02d} {tm[3]:02d}:{tm[4]:02d}:{tm[5]:02d}"
+            record["chrono"] = f"{time.ticks_diff(time.ticks_ms(), _start_ms) / 1000:f}"
 
             log_str = _format % record + "\n"
 
@@ -65,6 +70,7 @@ class Logger:
             raise e
 
     def setLevel(self, level):
+        self.inited = True
         self.level = level
 
     def debug(self, message, *args):
@@ -98,7 +104,7 @@ def getLogger(name="root"):
     return _loggers[name]
 
 
-def basicConfig(level=INFO, filename=None, filemode="a", format=None):
+def basicConfig(level=INFO, filename=None, filemode="a", format=None):  # pylint: disable=redefined-builtin
     global _filename, _level, _format
     _filename = filename
     _level = level
@@ -108,38 +114,3 @@ def basicConfig(level=INFO, filename=None, filemode="a", format=None):
     if filename is not None and filemode != "a":
         with open(filename, "w"):
             pass  # clear log file
-
-
-# TODO @deprecated
-def setLevel(level):
-    getLogger().setLevel(level)
-
-
-# TODO @deprecated
-def debug(message, *args):
-    getLogger().debug(message, *args)
-
-
-# TODO @deprecated
-def info(message, *args):
-    getLogger().info(message, *args)
-
-
-# TODO @deprecated
-def warning(message, *args):
-    getLogger().warning(message, *args)
-
-
-# TODO @deprecated
-def error(message, *args):
-    getLogger().error(message, *args)
-
-
-# TODO @deprecated
-def critical(message, *args):
-    getLogger().critical(message, *args)
-
-
-# TODO @deprecated
-def exception(exception, message, *args):
-    getLogger().exception(exception, message, *args)

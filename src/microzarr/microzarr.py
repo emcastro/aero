@@ -11,6 +11,8 @@ DIR_NAME = __file__.rsplit("/", 1)[0]
 
 DATA_SIZE = 2  # Assume data is in unsigned int16
 
+zarr_logger = ulogging.getLogger("Zarr")
+
 
 class Zarr:  # pylint: disable=R0902
     """
@@ -37,7 +39,7 @@ class Zarr:  # pylint: disable=R0902
         Raises:
             ZarrError: If the dataset structure is invalid.
         """
-        ulogging.info("Loading Zarr from %s", path)
+        zarr_logger.info("Loading Zarr from %s", path)
         # Analyze the Zarr structure
         groups = set(os.listdir(path))
 
@@ -103,7 +105,7 @@ class Zarr:  # pylint: disable=R0902
         Returns:
             int: The value at the specified coordinates.
         """
-        ulogging.debug("Get value at (%.6f, %.6f)", x, y)
+        zarr_logger.debug("Get value at (%.6f, %.6f)", x, y)
         row = self.y_axis.to_idx(y)
         column = self.x_axis.to_idx(x)
 
@@ -133,7 +135,7 @@ class Zarr:  # pylint: disable=R0902
         if self.data_xy == (chunk_id_x, chunk_id_y):
             return
 
-        ulogging.info("Loading chunk (%d, %d)", chunk_id_x, chunk_id_y)
+        zarr_logger.info("Loading chunk (%d, %d)", chunk_id_x, chunk_id_y)
 
         # Load the chunk data into the buffer
         with open(f"{self.path}/{self.main_group}/c/{chunk_id_y}/{chunk_id_x}", "rb") as file:
@@ -224,6 +226,8 @@ COORDINATE_SIZE = const(8)  # Assume data is in double 64bit
 SEEK_END = const(2)  # os.SEEK_END
 LOAD_WINDOW_SIZE = const(4)  # Number of values to load in the cache in one read
 
+axis_logger = ulogging.getLogger("Axis")
+
 
 class Axis:
     """
@@ -237,7 +241,7 @@ class Axis:
     """
 
     def __init__(self, values_path: str):
-        ulogging.info("Loading axis from %s", values_path)
+        axis_logger.info("Loading axis from %s", values_path)
 
         # Open the file containing the coordinate values, and leave it open
         self.values_path = values_path
@@ -246,12 +250,8 @@ class Axis:
 
         # print("CACHE_SIZE", CACHE_SIZE, "LOAD_WINDOW_SIZE", LOAD_WINDOW_SIZE)
         self.cache = LRUCache(
-            int(math.log2(self.data_size)) + 2 * LOAD_WINDOW_SIZE,
-            self.read_item,
-            name=f"Axis {values_path}",
-            # CACHE_SIZE, self.read_item, name=f"Axis {values_path}"
+            int(math.log2(self.data_size)) + 2 * LOAD_WINDOW_SIZE, self.read_item, name=f"Axis {values_path}"
         )
-        print("===========", self.cache.capacity, LOAD_WINDOW_SIZE)
         # Now that self.data_file, with can use __getitem__ to read the values
         self.standard_orientation = self[0] <= self[self.data_size - 1]
 
@@ -330,7 +330,7 @@ class Axis:
     def read_item(self, idx: int):
         idx_aligned = idx // LOAD_WINDOW_SIZE * LOAD_WINDOW_SIZE  # Align to LOAD_WINDOW_SIZE
         window_size = min(self.data_size - idx_aligned, LOAD_WINDOW_SIZE)
-        ulogging.debug(
+        axis_logger.debug(
             "Reading axis item for indices %d-%d(%d) from %s",
             idx_aligned,
             idx_aligned + window_size - 1,

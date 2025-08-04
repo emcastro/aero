@@ -5,8 +5,9 @@ import gc
 
 import ulogging
 
+ulogging.basicConfig(level=ulogging.INFO, format="%(chrono)s:%(levelname)-7s:%(name)-10s:%(message)s")
 # ulogging.basicConfig(level=ulogging.DEBUG, format="%(levelname)-7s:%(name)s:%(message)s")
-ulogging.basicConfig(level=ulogging.CRITICAL, format="%(chrono)s:%(levelname)-7s:%(name)s:%(message)s")
+ulogging.getLogger("LRUCache").setLevel(ulogging.NOLOG)
 
 
 def run():
@@ -23,12 +24,12 @@ def run():
     x = -0.4561
     y = 49.17617
     result = []
-    for i in range(0, 100):
+    for _ in range(0, 100):
         x, y = wgs84_project(x, y, 135, 100)
         result.append((x, y, zarr.value_at(x, y)))
     t1 = time.ticks_ms()
-    for line in result:
-        print(*line)
+    # for line in result:
+    #     print(*line)
     print("Init      time:", time.ticks_diff(t0, tm1))
     print("Execution time:", exec_time := time.ticks_diff(t1, t0))
     print("FREE1", gc.mem_free())
