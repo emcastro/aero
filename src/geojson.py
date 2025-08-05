@@ -33,6 +33,20 @@ class GeoJsonWriter:
         finally:
             self.file.close()
 
+    def point(self, props: Dict, coord: Tuple[float, float]):
+        self.comma()
+        json.dump(
+            {
+                "type": "Feature",
+                "properties": props,
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": coord,
+                },
+            },
+            self.file,
+        )
+
     def polygon(self, props: Dict, coords: List[Tuple[float, float]]):
         self.comma()
         json.dump(
@@ -47,15 +61,16 @@ class GeoJsonWriter:
             self.file,
         )
 
-    def point(self, props: Dict, coord: Tuple[float, float]):
+    def bbox_polygon(self, props: Dict, coords: Tuple[float, float, float, float]):
         self.comma()
+        min_x, min_y, max_x, max_y = coords
         json.dump(
             {
                 "type": "Feature",
                 "properties": props,
                 "geometry": {
-                    "type": "Point",
-                    "coordinates": coord,
+                    "type": "Polygon",
+                    "coordinates": [[(min_x, min_y), (max_x, min_y), (max_x, max_y), (min_x, max_y), (min_x, min_y)]],
                 },
             },
             self.file,

@@ -3,7 +3,7 @@ import time
 
 import ulogging
 from geojson import GeoJsonWriter
-from geolib import wgs84_project
+from geolib import calc_bbox, wgs84_project
 from microzarr import Zarr
 
 ulogging.basicConfig(level=ulogging.INFO, format="%(chrono)s:%(levelname)-7s:%(name)-10s:%(message)s")
@@ -27,6 +27,7 @@ def run():
     aircraft = (x, y)
     speed_mps = 60.0
     warning_time_s = 30
+    aircraft_time = time.time()
     result = []
     for i in range(0, 62):
         azimuth = 135 - i
@@ -53,19 +54,28 @@ def run():
 
         polygon_coords = [T, R1, R2, aircraft, L2, L1, T]
 
-        result.append((aircraft, zarr.value_at(*aircraft), azimuth, polygon_coords))
+        polygon_bbox = calc_bbox(polygon_coords)
+
+        result.append((aircraft, zarr.value_at(*aircraft), azimuth, polygon_coords, polygon_bbox, aircraft_time))
+
+        aircraft_time += 100 / speed_mps
     t1 = time.ticks_ms()
 
     with GeoJsonWriter("zones.geojson") as geojson:
-        for aircraft, elevation, azimuth, polygon_coords in result:
+        for aircraft, elevation, azimuth, polygon_coords, bbox, aircraft_time in result:
+            (year, month, mday, hour, minute, second, *_) = time.localtime(
+                int(aircraft_time)
+            )  # TODO complete failure on STM32
+            date = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second:02}Z"
             geojson.point(
-                {"azimuth": azimuth, "elevation": elevation},
+                {"date": date, "azimuth": azimuth, "elevation": elevation},
                 aircraft,
             )
             geojson.polygon(
-                {"azimuth": azimuth, "elevation": elevation},
+                {"date": date, "azimuth": azimuth, "elevation": elevation},
                 polygon_coords,
             )
+            geojson.bbox_polygon({"date": date}, bbox)
 
     del result
     print("Init      time:", time.ticks_diff(t0, tm1))

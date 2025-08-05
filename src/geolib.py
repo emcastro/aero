@@ -1,6 +1,6 @@
 from math import asin, atan2, cos, degrees, radians, sin
 
-from microtyping import Tuple
+from microtyping import List, Tuple
 
 # Average radius of the Earth in meters
 R = const(6371008.8)
@@ -86,3 +86,37 @@ def wgs84_azimuth(pt1: Tuple[float, float], pt2: Tuple[float, float]) -> float:
 
     azimuth = atan2(x, y)
     return degrees(azimuth) % 360
+
+
+MINUS_INF = float("-inf")
+PLUS_INF = float("inf")
+
+
+def calc_bbox(coords: List[Tuple[float, float]]) -> Tuple[float, float, float, float]:
+    """
+    Computes the bounding box for a list of coordinates.
+
+    Args:
+        coords (list): A list of tuples containing longitude and latitude pairs.
+
+    Returns:
+        tuple: A tuple containing the minimum longitude, minimum latitude,
+               maximum longitude, and maximum latitude.
+    """
+
+    min_lon = PLUS_INF
+    max_lon = MINUS_INF
+    min_lat = PLUS_INF
+    max_lat = MINUS_INF
+
+    for lon, lat in coords:
+        if lon < min_lon:  # pylint: disable=consider-using-min-builtin
+            min_lon = lon
+        if lon > max_lon:  # pylint: disable=consider-using-max-builtin
+            max_lon = lon
+        if lat < min_lat:  # pylint: disable=consider-using-min-builtin
+            min_lat = lat
+        if lat > max_lat:  # pylint: disable=consider-using-max-builtin
+            max_lat = lat
+
+    return min_lon, min_lat, max_lon, max_lat
