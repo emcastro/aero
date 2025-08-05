@@ -8,7 +8,7 @@ R = const(6371008.8)
 
 # Projects a point from lat/lon on the great circle with azimuth alpha (in degrees)
 # at a distance (in meters)
-def wgs84_project(lon: float, lat: float, azimuth: float, distance: float):
+def wgs84_project_xy(lon: float, lat: float, azimuth: float, distance: float):
     """
     Projects a point from latitude/longitude along a great circle path with a given azimuth and distance.
 
@@ -48,6 +48,22 @@ def wgs84_project(lon: float, lat: float, azimuth: float, distance: float):
     target_lon = degrees(target_lon)
 
     return target_lon, target_lat
+
+
+def wgs84_project(pt: Tuple[float, float], azimuth: float, distance: float) -> Tuple[float, float]:
+    """
+    Projects a point along a great circle path with a given azimuth and distance.
+    Same implementation as `wgs84_project`, but takes a point tuple as input.
+
+    Args:
+        pt (tuple): A tuple containing the longitude and latitude of the starting point.
+        azimuth (float): Azimuth angle in degrees.
+        distance (float): Distance to project in meters.
+
+    Returns:
+        tuple: A tuple containing the longitude and latitude of the projected point.
+    """
+    return wgs84_project_xy(pt[0], pt[1], azimuth, distance)
 
 
 def wgs84_azimuth(pt1: Tuple[float, float], pt2: Tuple[float, float]) -> float:

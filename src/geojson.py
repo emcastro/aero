@@ -3,9 +3,9 @@ import json
 from microtyping import Dict, List, Tuple
 
 
-class GeoJsonWrite:
+class GeoJsonWriter:
     def __init__(self, filename: str):
-        self.file = open(filename, "w")
+        self.file = open(filename, "w")  # pylint: disable=consider-using-with
         self.need_comma = False
 
     def __enter__(self):
@@ -26,8 +26,10 @@ class GeoJsonWrite:
             self.need_comma = True
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.file.write("]}")
-        self.file.close()
+        try:
+            self.file.write("]}")
+        finally:
+            self.file.close()
 
     def polygon(self, props: Dict, coords: List[Tuple[float, float]]):
         self.comma()
@@ -56,4 +58,3 @@ class GeoJsonWrite:
             },
             self.file,
         )
-
