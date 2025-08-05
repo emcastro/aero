@@ -1,5 +1,5 @@
 """
-The tuple to pass or receive from the time methods is unfortunately 
+The tuple to pass or receive from the time methods is unfortunately
 defined differently on different ports, boards and versions of MicroPython.
 
 The _Time8Tuple and _Time9Tuple are the most common ones, and are unified in the _TimeTuple.

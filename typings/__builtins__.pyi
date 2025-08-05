@@ -1,5 +1,4 @@
-"""Allows for type checking of Micropython specific builtins by pyright and pylance.
-"""
+"""Allows for type checking of Micropython specific builtins by pyright and pylance."""
 
 from typing import Tuple, TypeVar
 

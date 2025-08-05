@@ -1,7 +1,7 @@
 """
 IRQ object types, used in the machine, bluetooth, _rp2 and rp2 modules
 
-_IRQ  is a union of the types _IRQ_ESP32, _IRQ_RP2 and _IRQ_PYB 
+_IRQ  is a union of the types _IRQ_ESP32, _IRQ_RP2 and _IRQ_PYB
 to allow the same stubs to support of the different ports of MicroPython.
 
 """

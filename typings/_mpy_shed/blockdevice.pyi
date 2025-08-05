@@ -1,5 +1,5 @@
 """
-The AbstractBlockDev class is a template for the design of block device classes, 
+The AbstractBlockDev class is a template for the design of block device classes,
 MicroPython does not actually provide that class.
 
 In the type stubs this is implemented as a Protocol, which is a Python 3.8 feature that allows for more flexible type checking.

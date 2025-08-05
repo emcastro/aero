@@ -11,7 +11,9 @@ from collections.abc import (
     Reversible,
 )
 from collections.abc import Set as AbstractSet
-from collections.abc import Sized
+from collections.abc import (
+    Sized,
+)
 from io import BufferedRandom, BufferedReader, BufferedWriter, FileIO, TextIOWrapper
 from types import CellType, CodeType, TracebackType
 

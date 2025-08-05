@@ -1,7 +1,7 @@
 """
 Type aliases for the Micropython specific modes used in the `open` function.
 
-References: 
+References:
  - https://docs.micropython.org/en/latest/library/io.html#conceptual-hierarchy
  - https://docs.python.org/3/library/io.html
 """
