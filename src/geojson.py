@@ -1,10 +1,12 @@
 import json
+import os
 
 from microtyping import Dict, List, Tuple
 
 
 class GeoJsonWriter:
     def __init__(self, filename: str):
+        print("Writing geojson to ", filename if filename.startswith("/") else f"{os.getcwd()}/{filename}")
         self.file = open(filename, "w")  # pylint: disable=consider-using-with
         self.need_comma = False
 

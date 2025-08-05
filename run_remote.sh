@@ -17,4 +17,4 @@ echo Deploy libraries
 $mpremote cp -r $(find src -mindepth 1 -maxdepth 1 ! -path 'src/macropython') :/sd/
 
 echo Run
-$mpremote run "$SCRIPT" "$@" | sed s:/sd:"$DIR/src":
+$mpremote run "$SCRIPT" "$@" | sed -e s:'File "':"File \"$DIR/src/": -e s:'src/<stdin>':"$SCRIPT":
