@@ -12,6 +12,7 @@ sub-fields.
 """
 
 from typing import Any
+
 from _typeshed import Incomplete
 
 VOID: int

@@ -6,7 +6,8 @@ MicroPython module: https://docs.micropython.org/en/v1.20.0/library/lcd160cr.htm
 This module provides control of the MicroPython LCD160CR display.
 """
 
-from typing import Tuple, Any
+from typing import Any, Tuple
+
 from _typeshed import Incomplete
 
 LANDSCAPE: int

@@ -54,7 +54,8 @@ The following data types are supported:
 +--------+--------------------+-------------------+---------------+
 """
 
-from typing import Tuple, Any
+from typing import Any, Tuple
+
 from _typeshed import Incomplete
 
 def pack_into(fmt, buffer, offset, v1, *args, **kwargs) -> Incomplete:

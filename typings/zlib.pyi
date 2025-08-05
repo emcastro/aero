@@ -12,6 +12,7 @@ is not yet implemented.
 """
 
 from typing import Any
+
 from _typeshed import Incomplete
 
 def decompress(data, wbits=0, bufsize=0, /) -> bytes:

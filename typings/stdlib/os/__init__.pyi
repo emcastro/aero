@@ -11,15 +11,51 @@ functions.
 """
 
 from __future__ import annotations
+
 import sys
+from abc import abstractmethod
+from builtins import OSError
+from collections.abc import (
+    Callable,
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    Sequence,
+)
+from contextlib import AbstractContextManager
+from io import BufferedRandom, BufferedReader, BufferedWriter, FileIO, TextIOWrapper
+from subprocess import Popen
+from types import TracebackType
+from typing import (
+    IO,
+    Any,
+    AnyStr,
+    BinaryIO,
+    Final,
+    Generic,
+    Iterator,
+    Literal,
+    NoReturn,
+    Optional,
+    Protocol,
+    Tuple,
+    TypeVar,
+    final,
+    overload,
+    runtime_checkable,
+)
+
+# from . import path as _path
+from _mpy_shed import uname_result
 from _typeshed import (
-    Incomplete,
     AnyStr_co,
     BytesPath,
     FileDescriptor,
     FileDescriptorLike,
     FileDescriptorOrPath,
     GenericPath,
+    Incomplete,
     OpenBinaryMode,
     OpenBinaryModeReading,
     OpenBinaryModeUpdating,
@@ -33,35 +69,7 @@ from _typeshed import (
     WriteableBuffer,
     structseq,
 )
-from abc import abstractmethod
-from builtins import OSError
-from collections.abc import Callable, Iterable, Iterator, Mapping, MutableMapping, Sequence
-from contextlib import AbstractContextManager
-from io import BufferedRandom, BufferedReader, BufferedWriter, FileIO, TextIOWrapper
-from subprocess import Popen
-from types import TracebackType
-from typing import (
-    Iterator,
-    Optional,
-    Tuple,
-    IO,
-    Any,
-    AnyStr,
-    BinaryIO,
-    Final,
-    Generic,
-    Literal,
-    NoReturn,
-    Protocol,
-    TypeVar,
-    final,
-    overload,
-    runtime_checkable,
-)
-from typing_extensions import Awaitable, TypeVar, Self, TypeAlias, Unpack, deprecated
-
-# from . import path as _path
-from _mpy_shed import uname_result
+from typing_extensions import Awaitable, Self, TypeAlias, TypeVar, Unpack, deprecated
 
 if sys.version_info >= (3, 9):
     from types import GenericAlias

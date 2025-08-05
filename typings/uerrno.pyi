@@ -9,8 +9,9 @@ This module provides access to symbolic error codes for `OSError` exception.
 A particular inventory of codes depends on :term:`MicroPython port`.
 """
 
-from _typeshed import Incomplete
 from typing import Dict
+
+from _typeshed import Incomplete
 
 ENOBUFS: int
 ENODEV: int

@@ -9,7 +9,8 @@ This module provides functions to efficiently wait for events on multiple
 `streams <stream>` (select streams which are ready for operations).
 """
 
-from typing import Iterator, List, Optional, Tuple, Any
+from typing import Any, Iterator, List, Optional, Tuple
+
 from _typeshed import Incomplete
 
 POLLOUT: int

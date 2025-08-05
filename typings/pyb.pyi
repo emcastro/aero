@@ -6,7 +6,8 @@ MicroPython module: https://docs.micropython.org/en/v1.20.0/library/pyb.html
 The ``pyb`` module contains specific functions related to the board.
 """
 
-from typing import List, NoReturn, Optional, Tuple, Any
+from typing import Any, List, NoReturn, Optional, Tuple
+
 from _typeshed import Incomplete
 
 hid_mouse: tuple

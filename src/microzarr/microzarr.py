@@ -1,11 +1,13 @@
+import json
 import math
 import os
-import json
 import struct
+
 import micropython
-from microtyping import List
+
 import ulogging
 from lru_cache import LRUCache
+from microtyping import List
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
 

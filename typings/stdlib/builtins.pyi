@@ -1,8 +1,46 @@
 # ruff: noqa: PYI036 # This is the module declaring BaseException
 import _ast
-import _typeshed
 import sys
 import types
+from collections.abc import (
+    Awaitable,
+    Callable,
+    Iterable,
+    Iterator,
+    MutableSet,
+    Reversible,
+)
+from collections.abc import Set as AbstractSet
+from collections.abc import Sized
+from io import BufferedRandom, BufferedReader, BufferedWriter, FileIO, TextIOWrapper
+from types import CellType, CodeType, TracebackType
+
+# mypy crashes if any of {ByteString, Sequence, MutableSequence, Mapping, MutableMapping}
+# are imported from collections.abc in builtins.pyi
+from typing import (  # noqa: Y022
+    IO,
+    Any,
+    BinaryIO,
+    ClassVar,
+    Generic,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    NoReturn,
+    Protocol,
+    Sequence,
+    SupportsAbs,
+    SupportsBytes,
+    SupportsComplex,
+    SupportsFloat,
+    SupportsIndex,
+    TypeVar,
+    final,
+    overload,
+    type_check_only,
+)
+
+import _typeshed
 from _collections_abc import dict_items, dict_keys, dict_values
 from _typeshed import (
     AnyStr_co,
@@ -30,34 +68,6 @@ from _typeshed import (
     SupportsRichComparison,
     SupportsRichComparisonT,
     SupportsWrite,
-)
-from collections.abc import Awaitable, Callable, Iterable, Iterator, MutableSet, Reversible, Set as AbstractSet, Sized
-from io import BufferedRandom, BufferedReader, BufferedWriter, FileIO, TextIOWrapper
-from types import CellType, CodeType, TracebackType
-
-# mypy crashes if any of {ByteString, Sequence, MutableSequence, Mapping, MutableMapping}
-# are imported from collections.abc in builtins.pyi
-from typing import (  # noqa: Y022
-    IO,
-    Any,
-    BinaryIO,
-    ClassVar,
-    Generic,
-    Mapping,
-    MutableMapping,
-    MutableSequence,
-    NoReturn,
-    Protocol,
-    Sequence,
-    SupportsAbs,
-    SupportsBytes,
-    SupportsComplex,
-    SupportsFloat,
-    SupportsIndex,
-    TypeVar,
-    final,
-    overload,
-    type_check_only,
 )
 
 # we can't import `Literal` from typing or mypy crashes: see #11247

@@ -7,7 +7,8 @@ This module provides functionality specific to STM32 microcontrollers, including
 direct access to peripheral registers.
 """
 
-from typing import Tuple, Any
+from typing import Any, Tuple
+
 from _typeshed import Incomplete
 
 SPI_I2SPR: int

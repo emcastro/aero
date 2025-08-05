@@ -34,7 +34,8 @@ For example::
     s.close()
 """
 
-from typing import List, Optional, Tuple, Union, Any
+from typing import Any, List, Optional, Tuple, Union
+
 from _typeshed import Incomplete
 
 STA_IF: int

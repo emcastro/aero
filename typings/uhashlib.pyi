@@ -24,7 +24,8 @@ be implemented:
   will offer this.
 """
 
-from typing import Optional, Any
+from typing import Any, Optional
+
 from _typeshed import Incomplete
 
 class sha256:

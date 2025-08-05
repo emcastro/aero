@@ -9,7 +9,8 @@ This module implements conversions between binary data and various
 encodings of it in ASCII form (in both directions).
 """
 
-from typing import Optional, Any
+from typing import Any, Optional
+
 from _typeshed import Incomplete
 
 def crc32(*args, **kwargs) -> Any: ...

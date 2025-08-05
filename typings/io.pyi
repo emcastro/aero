@@ -73,7 +73,8 @@ classes corresponding to the hierarchy above, and it's not possible
 to implement, or subclass, a stream class in pure Python.
 """
 
-from typing import IO, Optional, Any
+from typing import IO, Any, Optional
+
 from _typeshed import Incomplete
 from stdlib.io import *
 

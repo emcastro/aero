@@ -1,6 +1,7 @@
-from _asyncio import Future as Future
 from concurrent.futures._base import Future as _ConcurrentFuture
 from typing import Any, TypeVar
+
+from _asyncio import Future as Future
 from typing_extensions import TypeIs
 
 from .events import AbstractEventLoop

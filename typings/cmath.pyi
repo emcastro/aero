@@ -12,7 +12,8 @@ Availability: not available on WiPy and ESP8266. Floating point support
 required for this module.
 """
 
-from typing import Tuple, Any
+from typing import Any, Tuple
+
 from _typeshed import Incomplete
 
 e: float

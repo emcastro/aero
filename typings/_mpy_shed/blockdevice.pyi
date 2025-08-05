@@ -19,7 +19,17 @@ https://docs.micropython.org/en/v1.24.0/reference/filesystem.html?highlight=abst
 - https://docs.micropython.org/en/latest/library/esp32.html#esp32.Partition.ioctl
 """
 
-from typing import Any, Final, Literal, Protocol, Tuple, Type, final, overload, runtime_checkable
+from typing import (
+    Any,
+    Final,
+    Literal,
+    Protocol,
+    Tuple,
+    Type,
+    final,
+    overload,
+    runtime_checkable,
+)
 
 from _typeshed import AnyStr_co, Incomplete, structseq
 from typing_extensions import TypeAlias, TypeVar

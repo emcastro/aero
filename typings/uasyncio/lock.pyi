@@ -1,6 +1,8 @@
-from . import core as core
-from _typeshed import Incomplete
 from collections.abc import Generator
+
+from _typeshed import Incomplete
+
+from . import core as core
 
 class Lock:
     state: int

@@ -11,7 +11,8 @@ malfunction, lockups, crashes of your board, and in extreme cases, hardware
 damage.
 """
 
-from typing import Callable, List, NoReturn, Optional, Tuple, Union, Any
+from typing import Any, Callable, List, NoReturn, Optional, Tuple, Union
+
 from _typeshed import Incomplete
 
 HARD_RESET: int

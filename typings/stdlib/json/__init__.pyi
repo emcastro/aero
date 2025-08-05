@@ -10,13 +10,16 @@ data format.
 """
 
 from __future__ import annotations
-from _typeshed import Incomplete, SupportsRead, SupportsWrite
-from typing import AnyStr, Tuple, overload, Any
 
-from .decoder import JSONDecodeError as JSONDecodeError, JSONDecoder as JSONDecoder
-from .encoder import JSONEncoder as JSONEncoder
+from typing import Any, AnyStr, Tuple, overload
+
 from _mpy_shed import IOBase_mp
+from _typeshed import Incomplete, SupportsRead, SupportsWrite
 from typing_extensions import Awaitable, TypeAlias, TypeVar
+
+from .decoder import JSONDecodeError as JSONDecodeError
+from .decoder import JSONDecoder as JSONDecoder
+from .encoder import JSONEncoder as JSONEncoder
 
 __all__ = ["dump", "dumps", "load", "loads", "JSONDecoder", "JSONDecodeError", "JSONEncoder"]
 

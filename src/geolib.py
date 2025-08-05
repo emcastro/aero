@@ -1,4 +1,5 @@
-from math import radians, degrees, sin, cos, asin, atan2
+from math import asin, atan2, cos, degrees, radians, sin
+
 from microtyping import Tuple
 
 # Average radius of the Earth in meters

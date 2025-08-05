@@ -1,5 +1,6 @@
-from . import core as core
 from _typeshed import Incomplete
+
+from . import core as core
 
 def ph_meld(h1, h2): ...
 def ph_pairing(child): ...

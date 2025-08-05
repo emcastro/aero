@@ -27,7 +27,8 @@ CPython module: :mod:`python:random` https://docs.python.org/3/library/random.ht
    enabled.
 """
 
-from typing import Optional, Any
+from typing import Any, Optional
+
 from _typeshed import Incomplete
 
 def randrange(start, stop, step: Optional[Any] = None) -> int:

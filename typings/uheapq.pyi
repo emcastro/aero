@@ -13,6 +13,7 @@ that the first item of the list is always the smallest.
 """
 
 from typing import Any
+
 from _typeshed import Incomplete
 
 def heappop(heap) -> Incomplete:

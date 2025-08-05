@@ -1,17 +1,22 @@
 import ssl
 import sys
-from _asyncio import (
-    _get_running_loop as _get_running_loop,
-    _set_running_loop as _set_running_loop,
-    get_event_loop as get_event_loop,
-    get_running_loop as get_running_loop,
-)
-from _typeshed import FileDescriptorLike, ReadableBuffer, StrPath, Unused, WriteableBuffer
 from abc import ABCMeta, abstractmethod
 from collections.abc import Callable, Sequence
 from contextvars import Context  # type: ignore
 from socket import AddressFamily, SocketKind, _Address, _RetAddress, socket
 from typing import IO, Any, Literal, Protocol, TypeVar, overload
+
+from _asyncio import _get_running_loop as _get_running_loop
+from _asyncio import _set_running_loop as _set_running_loop
+from _asyncio import get_event_loop as get_event_loop
+from _asyncio import get_running_loop as get_running_loop
+from _typeshed import (
+    FileDescriptorLike,
+    ReadableBuffer,
+    StrPath,
+    Unused,
+    WriteableBuffer,
+)
 from typing_extensions import Self, TypeAlias, TypeVarTuple, Unpack, deprecated
 
 from . import _AwaitableLike, _CoroutineLike
@@ -19,7 +24,14 @@ from .base_events import Server
 from .futures import Future
 from .protocols import BaseProtocol
 from .tasks import Task
-from .transports import BaseTransport, DatagramTransport, ReadTransport, SubprocessTransport, Transport, WriteTransport
+from .transports import (
+    BaseTransport,
+    DatagramTransport,
+    ReadTransport,
+    SubprocessTransport,
+    Transport,
+    WriteTransport,
+)
 from .unix_events import AbstractChildWatcher
 
 if sys.version_info >= (3, 14):

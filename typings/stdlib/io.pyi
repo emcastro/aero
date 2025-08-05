@@ -75,33 +75,42 @@ to implement, or subclass, a stream class in pure Python.
 """
 
 from __future__ import annotations
+
 import abc
 import sys
+from array import array
+from typing import overload
+
+from _io import DEFAULT_BUFFER_SIZE as DEFAULT_BUFFER_SIZE
+from _io import BlockingIOError as BlockingIOError
+from _io import BufferedRandom as BufferedRandom
+from _io import BufferedReader as BufferedReader
+from _io import BufferedRWPair as BufferedRWPair
+from _io import BufferedWriter as BufferedWriter
+from _io import BytesIO as BytesIO
+from _io import FileIO as FileIO
+from _io import IncrementalNewlineDecoder as IncrementalNewlineDecoder
+from _io import StringIO as StringIO
+from _io import TextIOWrapper as TextIOWrapper
 from _io import (
-    DEFAULT_BUFFER_SIZE as DEFAULT_BUFFER_SIZE,
-    BlockingIOError as BlockingIOError,
-    BufferedRandom as BufferedRandom,
-    BufferedReader as BufferedReader,
-    BufferedRWPair as BufferedRWPair,
-    BufferedWriter as BufferedWriter,
-    BytesIO as BytesIO,
-    FileIO as FileIO,
-    IncrementalNewlineDecoder as IncrementalNewlineDecoder,
-    StringIO as StringIO,
-    TextIOWrapper as TextIOWrapper,
     _BufferedIOBase,
     _IOBase,
     _RawIOBase,
     _TextIOBase,
-    _WrappedBuffer as _WrappedBuffer,  # used elsewhere in typeshed
-    open as open,
-    open_code as open_code,
 )
-from typing import overload
-from _mpy_shed import AnyReadableBuf, AnyWritableBuf, FileIO, IOBase_mp, PathLike, TextIOWrapper
+from _io import _WrappedBuffer as _WrappedBuffer  # used elsewhere in typeshed
+from _io import open as open
+from _io import open_code as open_code
+from _mpy_shed import (
+    AnyReadableBuf,
+    AnyWritableBuf,
+    FileIO,
+    IOBase_mp,
+    PathLike,
+    TextIOWrapper,
+)
 from _mpy_shed.io_modes import _OpenBinaryMode, _OpenTextModeWriting
 from _typeshed import Incomplete
-from array import array
 from typing_extensions import Awaitable, TypeAlias, TypeVar
 
 __all__ = [

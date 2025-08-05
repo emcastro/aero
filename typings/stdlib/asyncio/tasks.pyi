@@ -1,14 +1,20 @@
 import concurrent.futures
 import sys
-from _asyncio import (
-    Task as Task,
-    _enter_task as _enter_task,
-    _leave_task as _leave_task,
-    _register_task as _register_task,
-    _unregister_task as _unregister_task,
+from collections.abc import (
+    AsyncIterator,
+    Awaitable,
+    Coroutine,
+    Generator,
+    Iterable,
+    Iterator,
 )
-from collections.abc import AsyncIterator, Awaitable, Coroutine, Generator, Iterable, Iterator
 from typing import Any, Literal, Protocol, TypeVar, overload
+
+from _asyncio import Task as Task
+from _asyncio import _enter_task as _enter_task
+from _asyncio import _leave_task as _leave_task
+from _asyncio import _register_task as _register_task
+from _asyncio import _unregister_task as _unregister_task
 from typing_extensions import TypeAlias
 
 from . import _CoroutineLike

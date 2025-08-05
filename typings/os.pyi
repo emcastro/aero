@@ -10,7 +10,8 @@ terminal redirection and duplication, and the ``uname`` and ``urandom``
 functions.
 """
 
-from typing import IO, Iterator, Optional, Tuple, Any
+from typing import IO, Any, Iterator, Optional, Tuple
+
 from _typeshed import Incomplete
 from stdlib.os import *
 

@@ -1,6 +1,7 @@
 import collections
-from microtyping import List, Callable, Tuple
+
 import ulogging
+from microtyping import Callable, List, Tuple
 
 # Simulate type variables for type hints
 K = int

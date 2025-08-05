@@ -1,7 +1,9 @@
-import uio
-from . import core as core
-from _typeshed import Incomplete
 from collections.abc import Generator
+
+import uio
+from _typeshed import Incomplete
+
+from . import core as core
 
 class Event:
     state: bool

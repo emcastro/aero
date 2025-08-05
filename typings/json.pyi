@@ -10,6 +10,7 @@ data format.
 """
 
 from typing import Any
+
 from _typeshed import Incomplete
 
 def loads(str) -> Incomplete:

@@ -61,7 +61,8 @@ Tuple address format for ``socket`` module:
   of IPv6 support depends on a :term:`MicroPython port`.
 """
 
-from typing import IO, Optional, Tuple, Any
+from typing import IO, Any, Optional, Tuple
+
 from _typeshed import Incomplete
 from stdlib.socket import *
 

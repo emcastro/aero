@@ -8,6 +8,7 @@ As this still does not cover all cases, the _TimeTuple is a union of the two com
 """
 
 from typing import Tuple
+
 from typing_extensions import TypeAlias
 
 _Time8Tuple: TypeAlias = Tuple[int, int, int, int, int, int, int, int]

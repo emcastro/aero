@@ -7,16 +7,36 @@ CPython module: :mod:`python:sys` https://docs.python.org/3/library/sys.html .
 """
 
 from __future__ import annotations
+
 import sys
-from _typeshed import Incomplete, MaybeNone, OptExcInfo, ProfileFunction, TraceFunction, structseq
-from _typeshed.importlib import MetaPathFinderProtocol, PathEntryFinderProtocol
 from builtins import object as _object
 from collections.abc import AsyncGenerator, Callable
 from io import TextIOWrapper
 from types import FrameType, ModuleType, TracebackType
-from typing import Callable, overload, Any, Final, Literal, NoReturn, Protocol, TextIO, TypeVar, final
-from typing_extensions import Awaitable, TypeVar, TypeAlias
+from typing import (
+    Any,
+    Callable,
+    Final,
+    Literal,
+    NoReturn,
+    Protocol,
+    TextIO,
+    TypeVar,
+    final,
+    overload,
+)
+
 from _mpy_shed import IOBase_mp, _mp_implementation
+from _typeshed import (
+    Incomplete,
+    MaybeNone,
+    OptExcInfo,
+    ProfileFunction,
+    TraceFunction,
+    structseq,
+)
+from _typeshed.importlib import MetaPathFinderProtocol, PathEntryFinderProtocol
+from typing_extensions import Awaitable, TypeAlias, TypeVar
 
 _T = TypeVar("_T")
 

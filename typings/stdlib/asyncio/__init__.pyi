@@ -1,6 +1,7 @@
 import sys
 from collections.abc import Awaitable, Coroutine, Generator
 from typing import Any, TypeVar
+
 from typing_extensions import TypeAlias
 
 # As at runtime, this depends on all submodules defining __all__ accurately.
@@ -10,6 +11,7 @@ from .events import *
 from .exceptions import *
 from .futures import *
 from .locks import *
+from .micropython import *
 from .protocols import *
 from .queues import *
 from .runners import *
@@ -18,8 +20,6 @@ from .streams import *
 # from .subprocess import *
 from .tasks import *
 from .tasks import sleep_ms as sleep_ms
-from .micropython import *
-
 from .transports import *
 
 if sys.version_info >= (3, 9):

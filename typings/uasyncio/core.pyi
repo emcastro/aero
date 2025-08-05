@@ -1,5 +1,7 @@
-from .task import Task as Task, TaskQueue as TaskQueue
 from _typeshed import Incomplete
+
+from .task import Task as Task
+from .task import TaskQueue as TaskQueue
 
 class CancelledError(BaseException): ...
 class TimeoutError(Exception): ...

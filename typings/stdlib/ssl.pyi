@@ -11,39 +11,43 @@ facilities for network sockets, both client-side and server-side.
 """
 
 from __future__ import annotations
+
 import enum
 import socket
 import sys
+from collections.abc import Callable, Iterable
+from typing import Any, Literal, NamedTuple, TypedDict, overload
+
+from _mpy_shed import StrOrBytesPath
+from _ssl import _DEFAULT_CIPHERS as _DEFAULT_CIPHERS
+from _ssl import _OPENSSL_API_VERSION as _OPENSSL_API_VERSION
+from _ssl import HAS_ALPN as HAS_ALPN
+from _ssl import HAS_ECDH as HAS_ECDH
+from _ssl import HAS_NPN as HAS_NPN
+from _ssl import HAS_SNI as HAS_SNI
+from _ssl import OPENSSL_VERSION as OPENSSL_VERSION
+from _ssl import OPENSSL_VERSION_INFO as OPENSSL_VERSION_INFO
+from _ssl import OPENSSL_VERSION_NUMBER as OPENSSL_VERSION_NUMBER
+from _ssl import HAS_SSLv2 as HAS_SSLv2
+from _ssl import HAS_SSLv3 as HAS_SSLv3
+from _ssl import HAS_TLSv1 as HAS_TLSv1
+from _ssl import HAS_TLSv1_1 as HAS_TLSv1_1
+from _ssl import HAS_TLSv1_2 as HAS_TLSv1_2
+from _ssl import HAS_TLSv1_3 as HAS_TLSv1_3
+from _ssl import MemoryBIO as MemoryBIO
+from _ssl import RAND_add as RAND_add
+from _ssl import RAND_bytes as RAND_bytes
+from _ssl import RAND_status as RAND_status
+from _ssl import SSLSession as SSLSession
 from _ssl import (
-    _DEFAULT_CIPHERS as _DEFAULT_CIPHERS,
-    _OPENSSL_API_VERSION as _OPENSSL_API_VERSION,
-    HAS_ALPN as HAS_ALPN,
-    HAS_ECDH as HAS_ECDH,
-    HAS_NPN as HAS_NPN,
-    HAS_SNI as HAS_SNI,
-    OPENSSL_VERSION as OPENSSL_VERSION,
-    OPENSSL_VERSION_INFO as OPENSSL_VERSION_INFO,
-    OPENSSL_VERSION_NUMBER as OPENSSL_VERSION_NUMBER,
-    HAS_SSLv2 as HAS_SSLv2,
-    HAS_SSLv3 as HAS_SSLv3,
-    HAS_TLSv1 as HAS_TLSv1,
-    HAS_TLSv1_1 as HAS_TLSv1_1,
-    HAS_TLSv1_2 as HAS_TLSv1_2,
-    HAS_TLSv1_3 as HAS_TLSv1_3,
-    MemoryBIO as MemoryBIO,
-    RAND_add as RAND_add,
-    RAND_bytes as RAND_bytes,
-    RAND_status as RAND_status,
-    SSLSession as SSLSession,
     _PasswordType as _PasswordType,  # typeshed only, but re-export for other type stubs to use
+)
+from _ssl import (
     _SSLContext,
 )
 from _typeshed import Incomplete, ReadableBuffer, StrOrBytesPath, WriteableBuffer
-from collections.abc import Callable, Iterable
-from typing import Any, Literal, NamedTuple, TypedDict, overload
-from typing_extensions import Awaitable, TypeVar, Never, Self, TypeAlias
-from _mpy_shed import StrOrBytesPath
 from tls import *
+from typing_extensions import Awaitable, Never, Self, TypeAlias, TypeVar
 
 if sys.version_info >= (3, 13):
     from _ssl import HAS_PSK as HAS_PSK
@@ -55,7 +59,8 @@ if sys.version_info < (3, 10):
     from _ssl import RAND_egd as RAND_egd
 
 if sys.platform == "win32":
-    from _ssl import enum_certificates as enum_certificates, enum_crls as enum_crls
+    from _ssl import enum_certificates as enum_certificates
+    from _ssl import enum_crls as enum_crls
 
 _PCTRTT: TypeAlias = tuple[tuple[str, str], ...]
 _PCTRTTT: TypeAlias = tuple[_PCTRTT, ...]

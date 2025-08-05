@@ -10,12 +10,20 @@ hold/accumulate various objects.
 """
 
 from __future__ import annotations
+
 import sys
-from _collections_abc import dict_items, dict_keys, dict_values
-from _typeshed import Incomplete, SupportsItems, SupportsKeysAndGetItem, SupportsRichComparison, SupportsRichComparisonT
-from typing import Dict, Any, Generic, NoReturn, SupportsIndex, TypeVar, final, overload
-from typing_extensions import Awaitable, TypeAlias, TypeVar, Self
 from collections.abc import Iterable
+from typing import Any, Dict, Generic, NoReturn, SupportsIndex, TypeVar, final, overload
+
+from _collections_abc import dict_items, dict_keys, dict_values
+from _typeshed import (
+    Incomplete,
+    SupportsItems,
+    SupportsKeysAndGetItem,
+    SupportsRichComparison,
+    SupportsRichComparisonT,
+)
+from typing_extensions import Awaitable, Self, TypeAlias, TypeVar
 
 if sys.version_info >= (3, 9):
     from types import GenericAlias

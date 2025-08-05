@@ -1,9 +1,10 @@
 import ssl
 import sys
-from _typeshed import ReadableBuffer, StrPath, Incomplete
 from collections.abc import Awaitable, Callable, Iterable, Sequence, Sized
 from types import ModuleType
 from typing import Any, Protocol, SupportsIndex
+
+from _typeshed import Incomplete, ReadableBuffer, StrPath
 from typing_extensions import Self, TypeAlias
 
 from . import events, protocols, transports

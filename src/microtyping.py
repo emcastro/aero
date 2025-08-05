@@ -14,5 +14,5 @@ if sys.implementation.name == "micropython":  # type: ignore
         return None
 
 else:
-    from typing import List, Tuple, Callable, Dict
     from typing import TypeVar  # type: ignore
+    from typing import Callable, Dict, List, Tuple

@@ -1,5 +1,5 @@
-import time
 import gc
+import time
 
 # Emulate the micropython module in a way that is compatible with Python
 

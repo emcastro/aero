@@ -13,40 +13,37 @@ from __future__ import annotations
 
 import abc  # type: ignore - not collections.abc
 import sys
-
 from typing import Final, final
 
-from _typeshed import Incomplete, structseq, AnyStr_co
+from _typeshed import AnyStr_co, Incomplete, structseq
 from typing_extensions import TypeAlias, TypeVar
 
-from .subscriptable import Subscriptable as Subscriptable
-from .IRQs import _IRQ
-from .neopixelbase import _NeoPixelBase as _NeoPixelBase
+from .blockdevice import _BlockDeviceProtocol as _BlockDeviceProtocol
 from .blockdevice import (
-    _BlockDeviceProtocol as _BlockDeviceProtocol,
     _OldAbstractBlockDev,
     _OldAbstractReadOnlyBlockDev,
 )
-from .buffer_mp import AnyReadableBuf as AnyReadableBuf, AnyWritableBuf as AnyWritableBuf
-
+from .buffer_mp import AnyReadableBuf as AnyReadableBuf
+from .buffer_mp import AnyWritableBuf as AnyWritableBuf
+from .io_mp import BytesIO as BytesIO
+from .io_mp import FileIO as FileIO
+from .io_mp import IncrementalNewlineDecoder as IncrementalNewlineDecoder
+from .io_mp import IOBase_mp as IOBase_mp
+from .io_mp import StringIO as StringIO
+from .io_mp import TextIOWrapper as TextIOWrapper
 from .io_mp import (
-    BytesIO as BytesIO,
-    FileIO as FileIO,
-    IncrementalNewlineDecoder as IncrementalNewlineDecoder,
-    StringIO as StringIO,
-    TextIOWrapper as TextIOWrapper,
-    IOBase_mp as IOBase_mp,
     _BufferedIOBase,
     _IOBase,
     _RawIOBase,
     _TextIOBase,
-    open as open,
 )
-
-from .time_mp import _TimeTuple as _TimeTuple
-from .pathlike import PathLike as PathLike
-
+from .io_mp import open as open
+from .IRQs import _IRQ
 from .mp_implementation import _mp_implementation as _mp_implementation
+from .neopixelbase import _NeoPixelBase as _NeoPixelBase
+from .pathlike import PathLike as PathLike
+from .subscriptable import Subscriptable as Subscriptable
+from .time_mp import _TimeTuple as _TimeTuple
 
 # ------------------
 # copied from _typeshed  os.pyi as os.pyi cannot import from a module with the same name

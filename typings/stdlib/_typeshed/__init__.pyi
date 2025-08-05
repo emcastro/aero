@@ -3,7 +3,9 @@
 # See the README.md file in this directory for more information.
 
 import sys
-from collections.abc import Awaitable, Callable, Iterable, Sequence, Set as AbstractSet, Sized
+from collections.abc import Awaitable, Callable, Iterable, Sequence
+from collections.abc import Set as AbstractSet
+from collections.abc import Sized
 from dataclasses import Field
 from os import PathLike
 from types import FrameType, TracebackType
@@ -22,6 +24,7 @@ from typing import (
     final,
     overload,
 )
+
 from typing_extensions import Buffer, LiteralString, TypeAlias
 
 _KT = TypeVar("_KT")

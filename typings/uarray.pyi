@@ -10,7 +10,8 @@ Supported format codes: ``b``, ``B``, ``h``, ``H``, ``i``, ``I``, ``l``,
 floating-point support).
 """
 
-from typing import List, Optional, Any
+from typing import Any, List, Optional
+
 from _typeshed import Incomplete
 
 class array(List):
