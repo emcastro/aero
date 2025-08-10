@@ -1,6 +1,5 @@
 import gc
 import time
-import builtins
 
 # Emulate the micropython module in a way that is compatible with Python
 
@@ -12,15 +11,6 @@ def identity_decorator(func):
 
 # @micropython.native
 native = identity_decorator
-
-## builtins
-
-
-def const(value):
-    return value
-
-
-builtins.const = const  # type: ignore
 
 
 ## time
