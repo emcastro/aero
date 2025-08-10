@@ -26,6 +26,8 @@ def run():
     y = 49.17617
     aircraft = (x, y)
     speed_mps = 60.0
+    step_m = 100
+    duration = step_m / speed_mps
     warning_time_s = 30
     aircraft_time = time.time()
     aircraft_time_delta = 0.0  # 32bit float only
@@ -69,22 +71,26 @@ def run():
             )
         )
 
-        aircraft_time_delta += 100 / speed_mps
+        aircraft_time_delta += duration
     t1 = time.ticks_ms()
 
     with GeoJsonWriter("zones.geojson") as geojson:
         for aircraft, elevation, azimuth, polygon_coords, bbox, aircraft_time, aircraft_time_delta in result:
             (year, month, mday, hour, minute, second, *_) = time.gmtime(aircraft_time + int(aircraft_time_delta))
-            date = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second+aircraft_time_delta%1:02}Z"
+            date1 = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second:02}Z"
+            (year, month, mday, hour, minute, second, *_) = time.gmtime(
+                aircraft_time + int(aircraft_time_delta + duration)
+            )
+            date2 = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second:02}Z"
             geojson.point(
-                {"date": date, "azimuth": azimuth, "elevation": elevation},
+                {"type": "point", "date1": date1, "date2": date2, "azimuth": azimuth, "elevation": elevation},
                 aircraft,
             )
             geojson.polygon(
-                {"timestamp": aircraft_time_delta ,"date": date, "azimuth": azimuth, "elevation": elevation},
+                {"type": "zone", "date1": date1, "date2": date2, "azimuth": azimuth, "elevation": elevation},
                 polygon_coords,
             )
-            geojson.bbox_polygon({"date": date}, bbox)
+            geojson.bbox_polygon({"type": "bbox", "date1": date1, "date2": date2}, bbox)
 
     del result
     print("Init      time:", time.ticks_diff(t0, tm1))
