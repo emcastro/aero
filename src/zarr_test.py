@@ -3,7 +3,7 @@ import time
 
 import ulogging
 from geojson import GeoJsonWriter
-from geolib import calc_bbox, wgs84_project
+from geolib import calc_bbox, convexpoly_left_right, wgs84_project
 from microzarr import Zarr
 
 ulogging.basicConfig(level=ulogging.INFO, format="%(chrono)s:%(levelname)-7s:%(name)-10s:%(message)s")
@@ -31,8 +31,8 @@ def run():
     warning_time_s = 30
     aircraft_time = time.time()
     aircraft_time_delta = 0.0  # 32bit float only
-    result = []
-    for i in range(0, 62):
+
+    for i in range(0, 150):
         azimuth = 135 - i
         aircraft = wgs84_project(aircraft, azimuth, 100)
 
@@ -59,7 +59,11 @@ def run():
 
         polygon_bbox = calc_bbox(polygon_coords)
 
-        result.append(
+        left_side, right_side = convexpoly_left_right(polygon_coords)
+
+        # TODO pour 
+
+        yield (
             (
                 aircraft,
                 zarr.value_at(*aircraft),
@@ -68,14 +72,20 @@ def run():
                 polygon_bbox,
                 aircraft_time,
                 aircraft_time_delta,
+                duration,
             )
         )
 
         aircraft_time_delta += duration
     t1 = time.ticks_ms()
+    print("Init      time:", time.ticks_diff(t0, tm1))
+    print("Execution time:", time.ticks_diff(t1, t0))
+    print("FREE1", gc.mem_free())
 
+
+def write_json(result):
     with GeoJsonWriter("zones.geojson") as geojson:
-        for aircraft, elevation, azimuth, polygon_coords, bbox, aircraft_time, aircraft_time_delta in result:
+        for aircraft, elevation, azimuth, polygon_coords, bbox, aircraft_time, aircraft_time_delta, duration in result:
             (year, month, mday, hour, minute, second, *_) = time.gmtime(aircraft_time + int(aircraft_time_delta))
             date1 = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second:02}Z"
             (year, month, mday, hour, minute, second, *_) = time.gmtime(
@@ -92,14 +102,13 @@ def run():
             )
             geojson.bbox_polygon({"type": "bbox", "date1": date1, "date2": date2}, bbox)
 
-    del result
-    print("Init      time:", time.ticks_diff(t0, tm1))
-    print("Execution time:", exec_time := time.ticks_diff(t1, t0))
-    print("FREE1", gc.mem_free())
-    gc.collect()
-    print("FREE2", gc.mem_free())
-    return exec_time
 
+def nowrite_json(result):
+    for _ in result:
+        pass
 
 if __name__ == "__main__":
-    run()
+    write_json(run())
+    # nowrite_json(run())
+    gc.collect()
+    print("FREE2", gc.mem_free())

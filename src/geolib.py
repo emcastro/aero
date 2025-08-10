@@ -120,3 +120,40 @@ def calc_bbox(coords: List[Tuple[float, float]]) -> Tuple[float, float, float, f
             max_lat = lat
 
     return min_lon, min_lat, max_lon, max_lat
+
+
+def argminmax(items: List[float]):
+    idx_min = -1
+    value_max = MINUS_INF
+    idx_max = -1
+    value_min = PLUS_INF
+    for i, item in enumerate(items):
+        if item > value_max:
+            value_max = item
+            idx_min = i
+        if item < value_min:
+            value_min = item
+            idx_max = i
+    return idx_min, idx_max
+
+
+def convexpoly_left_right(points: List[Tuple[float, float]]):
+    ys = [y for x, y in points]
+    idx_min, idx_max = argminmax(ys)
+
+    if idx_min < idx_max:
+        points_down = points[idx_min : idx_max + 1]
+        points_up = points[idx_max:] + points[1 : idx_min + 1]
+    else:
+        points_down = points[idx_min:] + points[1 : idx_max + 1]
+        points_up = points[idx_max : idx_min + 1]
+
+    if points_down[0][0] < points_down[1][0]:
+        points_up.reverse()
+        left = points_up
+        right = points_down
+    else:
+        points_up.reverse()
+        left = points_down
+        right = points_up
+    return left, right
