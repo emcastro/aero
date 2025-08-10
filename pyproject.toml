@@ -17,6 +17,9 @@ dev = [
   "isort>=6.0.1",
   "black>=25.1.0",
   "debugpy>=1.8.16",
+  "geopandas>=1.1.1",
+  "matplotlib>=3.10.5",
+  "jupyter>=1.1.1",
 ]
 
 
