@@ -28,6 +28,7 @@ def run():
     speed_mps = 60.0
     warning_time_s = 30
     aircraft_time = time.time()
+    aircraft_time_delta = 0.0  # 32bit float only
     result = []
     for i in range(0, 62):
         azimuth = 135 - i
@@ -56,23 +57,31 @@ def run():
 
         polygon_bbox = calc_bbox(polygon_coords)
 
-        result.append((aircraft, zarr.value_at(*aircraft), azimuth, polygon_coords, polygon_bbox, aircraft_time))
+        result.append(
+            (
+                aircraft,
+                zarr.value_at(*aircraft),
+                azimuth,
+                polygon_coords,
+                polygon_bbox,
+                aircraft_time,
+                aircraft_time_delta,
+            )
+        )
 
-        aircraft_time += 100 / speed_mps
+        aircraft_time_delta += 100 / speed_mps
     t1 = time.ticks_ms()
 
     with GeoJsonWriter("zones.geojson") as geojson:
-        for aircraft, elevation, azimuth, polygon_coords, bbox, aircraft_time in result:
-            (year, month, mday, hour, minute, second, *_) = time.localtime(
-                int(aircraft_time)
-            )  # TODO complete failure on STM32
-            date = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second:02}Z"
+        for aircraft, elevation, azimuth, polygon_coords, bbox, aircraft_time, aircraft_time_delta in result:
+            (year, month, mday, hour, minute, second, *_) = time.gmtime(aircraft_time + int(aircraft_time_delta))
+            date = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second+aircraft_time_delta%1:02}Z"
             geojson.point(
                 {"date": date, "azimuth": azimuth, "elevation": elevation},
                 aircraft,
             )
             geojson.polygon(
-                {"date": date, "azimuth": azimuth, "elevation": elevation},
+                {"timestamp": aircraft_time_delta ,"date": date, "azimuth": azimuth, "elevation": elevation},
                 polygon_coords,
             )
             geojson.bbox_polygon({"date": date}, bbox)

@@ -9,5 +9,5 @@ async def staggered_race(
     coro_fns: Iterable[Callable[[], Awaitable[Any]]],
     delay: float | None,
     *,
-    loop: events.AbstractEventLoop | None = None
+    loop: events.AbstractEventLoop | None = None,
 ) -> tuple[Any, int | None, list[Exception | None]]: ...

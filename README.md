@@ -21,6 +21,11 @@ Fun with Zarr v3 (as of QGIS Desktop) in MicroPython
 - https://docs.micropython.org/en/latest/library/index.html
 - https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html
 
+# Build
+The project uses UV: https://docs.astral.sh/uv/getting-started/installation/
+```bash
+uv run bash
+```
 
 # Run and Install on STM32
 ```bash

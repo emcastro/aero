@@ -31,7 +31,7 @@ if sys.version_info >= (3, 12):
         main: Coroutine[Any, Any, _T],
         *,
         debug: bool | None = ...,
-        loop_factory: Callable[[], AbstractEventLoop] | None = ...
+        loop_factory: Callable[[], AbstractEventLoop] | None = ...,
     ) -> _T: ...
 
 else:
