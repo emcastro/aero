@@ -5,6 +5,7 @@ version = "0.0.0"
 requires-python = ">=3.12"
 dependencies = [
     "click>=8.2.1",
+    "fiona>=1.10.1",
     "rasterio>=1.4.3",
     "requests>=2.32.4",
 ]
