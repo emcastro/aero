@@ -255,7 +255,7 @@ class Axis:
             int(math.log2(self.data_size)) + 2 * LOAD_WINDOW_SIZE, self.read_item, name=f"Axis {values_path}"
         )
         # Now that self.data_file, with can use __getitem__ to read the values
-        self.standard_orientation = self[0] <= self[self.data_size - 1]
+        self.standard_orientation = self.get(0) <= self.get(self.data_size - 1)
 
     @staticmethod
     def from_group(path: str, metadata: dict):
@@ -289,7 +289,7 @@ class Axis:
         low, high = 0, self.data_size - 1
         while low <= high:
             mid = (low + high) // 2
-            mid_value = self[mid]
+            mid_value = self.get(mid)
             if self.standard_orientation:
                 if mid_value < target_value:
                     low = mid + 1
@@ -309,15 +309,15 @@ class Axis:
         assert high + 1 == low
 
         # Find closest value
-        a = abs(self[high] - target_value)
-        b = abs(self[low] - target_value)
+        a = abs(self.get(high) - target_value)
+        b = abs(self.get(low) - target_value)
 
         if a < b:
             return high
         else:
             return low
 
-    def __getitem__(self, idx: int):
+    def get(self, idx: int):
         """
         Retrieves the coordinate value at the specified index.
 

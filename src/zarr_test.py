@@ -55,18 +55,23 @@ def run():
         R2 = wgs84_project(aircraft, azimuth + 90, distance_m * 0.10)
         # pylint: enable=invalid-name
 
-        polygon_coords = [T, R1, R2, aircraft, L2, L1, T]
+        polygon_coords = [T, R1, R2, L2, L1, T]
 
         polygon_bbox = calc_bbox(polygon_coords)
 
         left_side, right_side = convexpoly_left_right(polygon_coords)
 
-        # TODO pour 
+        # TODO pour chaque bord, établir la liste des row
+
+        left_rows = [zarr.y_axis.to_idx(pt[1]) for pt in left_side]
+        right_rows = [zarr.y_axis.to_idx(pt[1]) for pt in right_side]
+
+        altitude = zarr.value_at(*aircraft)
 
         yield (
             (
                 aircraft,
-                zarr.value_at(*aircraft),
+                altitude,
                 azimuth,
                 polygon_coords,
                 polygon_bbox,
@@ -106,6 +111,7 @@ def write_json(result):
 def nowrite_json(result):
     for _ in result:
         pass
+
 
 if __name__ == "__main__":
     write_json(run())
