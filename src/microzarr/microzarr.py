@@ -254,7 +254,7 @@ class Axis:
         self.cache = LRUCache(
             int(math.log2(self.data_size)) + 2 * LOAD_WINDOW_SIZE, self.read_item, name=f"Axis {values_path}"
         )
-        # Now that self.data_file, with can use __getitem__ to read the values
+        # Now self.data_file is set, with can use .get() to read the values
         self.standard_orientation = self.get(0) <= self.get(self.data_size - 1)
 
     @staticmethod
