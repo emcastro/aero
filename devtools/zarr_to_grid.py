@@ -12,10 +12,10 @@ def get_tile_features_rasterio(zarr_path):
         width, height = src.width, src.height
         n_tiles_x = (width + block_width - 1) // block_width
         n_tiles_y = (height + block_height - 1) // block_height
-        for ty in range(n_tiles_y):
-            for tx in range(n_tiles_x):
-                col_offset = tx * block_width
-                row_offset = ty * block_height
+        for chunk_row in range(n_tiles_y):
+            for chunk_column in range(n_tiles_x):
+                col_offset = chunk_column * block_width
+                row_offset = chunk_row * block_height
                 w = min(block_width, width - col_offset)
                 h = min(block_height, height - row_offset)
                 win = Window(col_offset, row_offset, w, h)  # type: ignore
@@ -36,7 +36,7 @@ def get_tile_features_rasterio(zarr_path):
                 yield {
                     "type": "Feature",
                     "geometry": poly,
-                    "properties": {"col": tx, "row": ty},
+                    "properties": {"chunk_column": chunk_column, "chunk_row": chunk_row},
                 }
 
 
@@ -48,7 +48,7 @@ def zarr_to_fgb_tiles(out, source):
 
     schema = {
         "geometry": "Polygon",
-        "properties": {"col": "int", "row": "int"},
+        "properties": {"chunk_column": "int", "chunk_row": "int"},
     }
 
     with fiona.open(
