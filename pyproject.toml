@@ -66,6 +66,7 @@ disable = [
   "too-many-locals",
   "too-many-arguments",
   "too-few-public-methods",
+  "too-many-instance-attributes",
   "unspecified-encoding",
   "global-statement",
 ]

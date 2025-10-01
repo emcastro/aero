@@ -226,7 +226,7 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
 
 COORDINATE_SIZE = const(8)  # Assume data is in double 64bit
 SEEK_END = const(2)  # os.SEEK_END
-LOAD_WINDOW_SIZE = const(4)  # Number of values to load in the cache in one read
+CACHE_SIZE = const(64)  # Number of values to read in one block
 
 axis_logger = ulogging.getLogger("Axis")
 
@@ -250,12 +250,14 @@ class Axis:
         self.data_file = open(values_path, "rb")  # pylint: disable=R1732
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
 
-        # print("CACHE_SIZE", CACHE_SIZE, "LOAD_WINDOW_SIZE", LOAD_WINDOW_SIZE)
-        self.cache = LRUCache(
-            int(math.log2(self.data_size)) + 2 * LOAD_WINDOW_SIZE, self.read_item, name=f"Axis {values_path}"
-        )
+        self.one_coord = bytearray(COORDINATE_SIZE)
+        self.current_block = bytearray(COORDINATE_SIZE * CACHE_SIZE)
+        self.block_start = -COORDINATE_SIZE * CACHE_SIZE
+
         # Now self.data_file is set, with can use .get() to read the values
-        self.standard_orientation = self.get(0) <= self.get(self.data_size - 1)
+        self.first = self.read_one(0)
+        self.last = self.read_one(self.data_size - 1)
+        self.standard_orientation = self.first <= self.last
 
     @staticmethod
     def from_group(path: str, metadata: dict):
@@ -274,72 +276,71 @@ class Axis:
 
         return Axis(f"{path}/{metadata['dimension_name']}/c/0")
 
-    @micropython.native
-    def to_idx(self, target_value: float):
-        """
-        Finds the index of the closest value to the target value on the axis.
+    def to_idx(self, target_value: float) -> int:
+        # Si on est dans la zone chargé, on fait binary search dans le block
+        # - il faut donc avoir les target_value limites de la zone
+        # Sinon, on fait une recherche binaire classique en mode lent (lecture 1 par 1)
+        # Et on charge le block autour de la valeur trouvée
 
-        Args:
-            target_value (float): The coordinate value to find the index for.
+        if self.block_start > 0:
+            start_block_value = self.current_block[0]
+            end_block_value = self.current_block[-1]
 
-        Returns:
-            int: The index of the closest value.
-        """
-        # Binary search in self.value of nearest value
-        low, high = 0, self.data_size - 1
-        while low <= high:
-            mid = (low + high) // 2
-            mid_value = self.get(mid)
-            if self.standard_orientation:
-                if mid_value < target_value:
-                    low = mid + 1
-                elif mid_value > target_value:
-                    high = mid - 1
-                else:
-                    return mid
-            else:
-                if mid_value < target_value:
-                    high = mid - 1
-                elif mid_value > target_value:
-                    low = mid + 1
-                else:
-                    return mid
+            if start_block_value <= target_value <= end_block_value:
+                raise Exception("Pas fini")
 
-        # At this point, high is before low
-        assert high + 1 == low
+        # In any other case
+        return binary_search(target_value, self.read_one, self.data_size, self.standard_orientation)
 
-        # Find closest value
-        a = abs(self.get(high) - target_value)
-        b = abs(self.get(low) - target_value)
-
-        if a < b:
-            return high
-        else:
-            return low
-
-    def get(self, idx: int):
-        """
-        Retrieves the coordinate value at the specified index.
-
-        Args:
-            idx (int): The index of the coordinate value.
-
-        Returns:
-            float: The coordinate value at the specified index.
-        """
-        return self.cache.get(idx)
-
-    def read_item(self, idx: int):
-        idx_aligned = idx // LOAD_WINDOW_SIZE * LOAD_WINDOW_SIZE  # Align to LOAD_WINDOW_SIZE
-        window_size = min(self.data_size - idx_aligned, LOAD_WINDOW_SIZE)
+    def read_block(self, idx: int, target_block: bytearray):
         axis_logger.debug(
-            "Reading axis item for indices %d-%d(%d) from %s",
-            idx_aligned,
-            idx_aligned + window_size - 1,
+            "Reading axis items at index %d(%s) from %s",
             idx,
+            len(target_block) // COORDINATE_SIZE,
             self.values_path,
         )
-        self.data_file.seek((idx_aligned * COORDINATE_SIZE))
+        self.data_file.seek(idx * COORDINATE_SIZE)
+        return self.data_file.readinto(target_block)
 
-        data: List[float] = struct.unpack("<" + "d" * window_size, self.data_file.read(COORDINATE_SIZE * window_size))  # type: ignore
-        return [(idx_datum + idx_aligned, datum) for idx_datum, datum in enumerate(data)]
+    def read_one(self, idx: int):
+        self.read_block(idx, self.one_coord)
+        return struct.unpack("<d", self.one_coord)[0]  # type: ignore
+
+    def get_idx_in_current_block(self, idx: int):
+        local_idx = idx - self.block_start
+        data_pos = local_idx * COORDINATE_SIZE
+        return struct.unpack("<d", self.current_block, data_pos)[0]  # type: ignore
+
+
+@micropython.native
+def binary_search(target_value, read_data, data_size, standard_orientation):
+    low, high = 0, data_size - 1
+    while low <= high:
+        mid = (low + high) // 2
+        mid_value = read_data(mid)
+        if standard_orientation:
+            if mid_value < target_value:
+                low = mid + 1
+            elif mid_value > target_value:
+                high = mid - 1
+            else:
+                return mid
+        else:
+            if mid_value < target_value:
+                high = mid - 1
+            elif mid_value > target_value:
+                low = mid + 1
+            else:
+                return mid
+
+    # At this point, high is before low
+    assert high + 1 == low
+
+    # Find closest value
+    a = abs(read_data(high) - target_value)
+    b = abs(read_data(low) - target_value)
+
+    if a < b:
+        return high
+    else:
+        return low
