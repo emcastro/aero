@@ -6,12 +6,11 @@ import struct
 import micropython
 
 import ulogging
-from lru_cache import LRUCache
 from microtyping import List
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
 
-DATA_SIZE = 2  # Assume data is in unsigned int16
+DATA_SIZE = const(2)  # Assume data is in unsigned int16
 
 zarr_logger = ulogging.getLogger("Zarr")
 
@@ -224,9 +223,10 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
     return bindings
 
 
-COORDINATE_SIZE = const(8)  # Assume data is in double 64bit
 SEEK_END = const(2)  # os.SEEK_END
-CACHE_SIZE = const(64)  # Number of values to read in one block
+COORDINATE_SIZE = const(8)  # Assume data is in double 64bit
+CACHE_SIZE_BYTES = const(1024) # 1kB
+CACHE_SIZE = const(CACHE_SIZE_BYTES // COORDINATE_SIZE)  # Number of values to read in one block
 
 axis_logger = ulogging.getLogger("Axis")
 
@@ -251,8 +251,10 @@ class Axis:
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
 
         self.one_coord = bytearray(COORDINATE_SIZE)
-        self.current_block = bytearray(COORDINATE_SIZE * CACHE_SIZE)
-        self.block_start = -COORDINATE_SIZE * CACHE_SIZE
+        self.current_block = bytearray(CACHE_SIZE_BYTES)
+        self.block_start = -CACHE_SIZE_BYTES
+        self.start_block_value = math.nan
+        self.end_block_value = math.nan
 
         # Now self.data_file is set, with can use .get() to read the values
         self.first = self.read_one(0)
@@ -282,15 +284,35 @@ class Axis:
         # Sinon, on fait une recherche binaire classique en mode lent (lecture 1 par 1)
         # Et on charge le block autour de la valeur trouvée
 
-        if self.block_start > 0:
-            start_block_value = self.current_block[0]
-            end_block_value = self.current_block[-1]
+        RELOAD = True
 
-            if start_block_value <= target_value <= end_block_value:
-                raise Exception("Pas fini")
+        if self.block_start > 0:
+            start_block_value = self.start_block_value
+            end_block_value = self.end_block_value
+
+            if self.standard_orientation:
+                is_in_block = start_block_value <= target_value <= end_block_value
+            else:
+                is_in_block = start_block_value >= target_value >= end_block_value
+
+            if is_in_block:
+                print(self.values_path, "SHOULD BE IN BLOCK", target_value, start_block_value, end_block_value)
+                RELOAD = False
+            else:
+                print(self.values_path, "RELOAD            ", target_value, start_block_value, end_block_value)
+                # raise Exception("Pas fini")
 
         # In any other case
-        return binary_search(target_value, self.read_one, self.data_size, self.standard_orientation)
+        idx = binary_search(target_value, self.read_one, self.data_size, self.standard_orientation)
+
+        if RELOAD:
+            # Reload current_block
+            self.block_start = idx - CACHE_SIZE // 2
+            self.read_block(self.block_start, self.current_block)
+            self.start_block_value = self.get_idx_in_current_block(self.block_start)
+            self.end_block_value = self.get_idx_in_current_block(self.block_start + CACHE_SIZE - 1)
+
+        return idx
 
     def read_block(self, idx: int, target_block: bytearray):
         axis_logger.debug(
@@ -309,7 +331,7 @@ class Axis:
     def get_idx_in_current_block(self, idx: int):
         local_idx = idx - self.block_start
         data_pos = local_idx * COORDINATE_SIZE
-        return struct.unpack("<d", self.current_block, data_pos)[0]  # type: ignore
+        return struct.unpack_from("<d", self.current_block, data_pos)[0]  # type: ignore
 
 
 @micropython.native
