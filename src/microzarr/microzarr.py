@@ -225,7 +225,7 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
 
 SEEK_END = const(2)  # os.SEEK_END
 COORDINATE_SIZE = const(8)  # Assume data is in double 64bit
-CACHE_SIZE_BYTES = const(1024) # 1kB
+CACHE_SIZE_BYTES = const(1024)  # 1kB
 CACHE_SIZE = const(CACHE_SIZE_BYTES // COORDINATE_SIZE)  # Number of values to read in one block
 
 axis_logger = ulogging.getLogger("Axis")
@@ -279,13 +279,6 @@ class Axis:
         return Axis(f"{path}/{metadata['dimension_name']}/c/0")
 
     def to_idx(self, target_value: float) -> int:
-        # Si on est dans la zone chargé, on fait binary search dans le block
-        # - il faut donc avoir les target_value limites de la zone
-        # Sinon, on fait une recherche binaire classique en mode lent (lecture 1 par 1)
-        # Et on charge le block autour de la valeur trouvée
-
-        RELOAD = True
-
         if self.block_start > 0:
             start_block_value = self.start_block_value
             end_block_value = self.end_block_value
@@ -296,25 +289,31 @@ class Axis:
                 is_in_block = start_block_value >= target_value >= end_block_value
 
             if is_in_block:
-                print(self.values_path, "SHOULD BE IN BLOCK", target_value, start_block_value, end_block_value)
-                RELOAD = False
-            else:
-                print(self.values_path, "RELOAD            ", target_value, start_block_value, end_block_value)
-                # raise Exception("Pas fini")
+                axis_logger.debug(
+                    "Reading from cache %s (%d-%d) - %s",
+                    target_value,
+                    start_block_value,
+                    end_block_value,
+                    self.values_path,
+                )
+
+                idx = binary_search(target_value, self.get_idx_in_current_block, CACHE_SIZE, self.standard_orientation)
+
+                return idx + self.block_start  # <--- Fast track return point
 
         # In any other case
+        axis_logger.debug("Reading from files %s - %s", target_value, self.values_path)
         idx = binary_search(target_value, self.read_one, self.data_size, self.standard_orientation)
 
-        if RELOAD:
-            # Reload current_block
-            self.block_start = idx - CACHE_SIZE // 2
-            self.read_block(self.block_start, self.current_block)
-            self.start_block_value = self.get_idx_in_current_block(self.block_start)
-            self.end_block_value = self.get_idx_in_current_block(self.block_start + CACHE_SIZE - 1)
+        # Reload current_block
+        self.block_start = idx - CACHE_SIZE // 2
+        self.read_block_into(self.block_start, self.current_block)
+        self.start_block_value = self.get_idx_in_current_block(0)
+        self.end_block_value = self.get_idx_in_current_block(CACHE_SIZE - 1)
 
         return idx
 
-    def read_block(self, idx: int, target_block: bytearray):
+    def read_block_into(self, idx: int, target_block: bytearray):
         axis_logger.debug(
             "Reading axis items at index %d(%s) from %s",
             idx,
@@ -325,11 +324,10 @@ class Axis:
         return self.data_file.readinto(target_block)
 
     def read_one(self, idx: int):
-        self.read_block(idx, self.one_coord)
+        self.read_block_into(idx, self.one_coord)
         return struct.unpack("<d", self.one_coord)[0]  # type: ignore
 
-    def get_idx_in_current_block(self, idx: int):
-        local_idx = idx - self.block_start
+    def get_idx_in_current_block(self, local_idx: int):
         data_pos = local_idx * COORDINATE_SIZE
         return struct.unpack_from("<d", self.current_block, data_pos)[0]  # type: ignore
 
