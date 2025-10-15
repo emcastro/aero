@@ -251,10 +251,10 @@ class Axis:
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
 
         self.one_coord = bytearray(COORDINATE_SIZE)
-        self.current_block = bytearray(CACHE_SIZE_BYTES)
-        self.block_start = -CACHE_SIZE_BYTES
-        self.start_block_value = math.nan
-        self.end_block_value = math.nan
+        self.cache_block = bytearray(CACHE_SIZE_BYTES)
+        self.cache_start = -CACHE_SIZE_BYTES
+        self.start_cache_value = math.nan
+        self.end_cache_value = math.nan
 
         # Now self.data_file is set, with can use .get() to read the values
         self.first = self.read_one(0)
@@ -279,37 +279,40 @@ class Axis:
         return Axis(f"{path}/{metadata['dimension_name']}/c/0")
 
     def to_idx(self, target_value: float) -> int:
-        if self.block_start > 0:
-            start_block_value = self.start_block_value
-            end_block_value = self.end_block_value
+        # Check if cache exists
+        if self.cache_start > 0:
+            start_cache_value = self.start_cache_value
+            end_cache_value = self.end_cache_value
 
             if self.standard_orientation:
-                is_in_block = start_block_value <= target_value <= end_block_value
+                is_in_cache = start_cache_value <= target_value <= end_cache_value
             else:
-                is_in_block = start_block_value >= target_value >= end_block_value
+                is_in_cache = start_cache_value >= target_value >= end_cache_value
 
-            if is_in_block:
+            # If target value is in cache
+            if is_in_cache:
                 axis_logger.debug(
                     "Reading from cache %s (%d-%d) - %s",
                     target_value,
-                    start_block_value,
-                    end_block_value,
+                    start_cache_value,
+                    end_cache_value,
                     self.values_path,
                 )
 
+                # Search in the cache only
                 idx = binary_search(target_value, self.get_idx_in_current_block, CACHE_SIZE, self.standard_orientation)
 
-                return idx + self.block_start  # <--- Fast track return point
+                return idx + self.cache_start  # <--- Fast track return point
 
         # In any other case
         axis_logger.debug("Reading from files %s - %s", target_value, self.values_path)
         idx = binary_search(target_value, self.read_one, self.data_size, self.standard_orientation)
 
-        # Reload current_block
-        self.block_start = idx - CACHE_SIZE // 2
-        self.read_block_into(self.block_start, self.current_block)
-        self.start_block_value = self.get_idx_in_current_block(0)
-        self.end_block_value = self.get_idx_in_current_block(CACHE_SIZE - 1)
+        # Reload the cache
+        self.cache_start = idx - CACHE_SIZE // 2
+        self.read_block_into(self.cache_start, self.cache_block)
+        self.start_cache_value = self.get_idx_in_current_block(0)
+        self.end_cache_value = self.get_idx_in_current_block(CACHE_SIZE - 1)
 
         return idx
 
@@ -329,7 +332,7 @@ class Axis:
 
     def get_idx_in_current_block(self, local_idx: int):
         data_pos = local_idx * COORDINATE_SIZE
-        return struct.unpack_from("<d", self.current_block, data_pos)[0]  # type: ignore
+        return struct.unpack_from("<d", self.cache_block, data_pos)[0]  # type: ignore
 
 
 @micropython.native
