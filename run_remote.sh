@@ -14,7 +14,7 @@ fi
 
 echo Deploy libraries
 # shellcheck disable=SC2046
-$mpremote cp -r $(find src -mindepth 1 -maxdepth 1 ! -path 'src/macropython') :/sd/
+$mpremote cp -r $(find src -mindepth 1 -maxdepth 1 ! -path 'src/macropython' ! -name '__pycache__') :/sd/
 
 echo Run
 $mpremote run "$SCRIPT" "$@" | sed -e s:'File "':"File \"$DIR/src/": -e s:'src/<stdin>':"$SCRIPT":
