@@ -1,7 +1,7 @@
 import collections
 
 import ulogging
-from microtyping import Callable, Generic, List, Tuple, TypeVar
+from utyping import Callable, Generic, List, Tuple, TypeVar
 
 K = TypeVar("K")
 V = TypeVar("V")

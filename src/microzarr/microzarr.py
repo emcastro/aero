@@ -6,7 +6,7 @@ import struct
 import micropython
 
 import ulogging
-from microtyping import List
+from utyping import List
 
 DIR_NAME = __file__.rsplit("/", 1)[0]
 

@@ -1,7 +1,7 @@
 import json
 import os
 
-from microtyping import Dict, List, Tuple
+from utyping import Dict, List, Tuple
 
 
 class GeoJsonWriter:

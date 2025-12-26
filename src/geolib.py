@@ -1,6 +1,6 @@
 from math import asin, atan2, cos, degrees, radians, sin
 
-from microtyping import List, Tuple
+from utyping import List, Tuple
 
 # Average radius of the Earth in meters
 R = const(6371008.8)
