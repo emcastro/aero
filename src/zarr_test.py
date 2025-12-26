@@ -1,11 +1,12 @@
-from utyping import Tuple
 import gc
+import math
 import time
 
 import ulogging
 from geojson import GeoJsonWriter
 from geolib import SideSegment, calc_bbox, convexpoly_left_right, wgs84_project
 from microzarr import Zarr
+from utyping import Tuple
 
 ulogging.basicConfig(level=ulogging.INFO, format="%(chrono)s:%(levelname)-7s:%(name)-10s:%(message)s")
 # ulogging.basicConfig(level=ulogging.DEBUG, format="%(levelname)-7s:%(name)s:%(message)s")
@@ -62,7 +63,7 @@ def run():
             return polygon_coords
 
         polygon_coords = make_front_poly(aircraft, azimuth, distance_m)
-        left_side, right_side = convexpoly_left_right(polygon_coords)    
+        left_side, right_side = convexpoly_left_right(polygon_coords)
         lefts = [zarr.loc_at(*pt) for pt in left_side]
         rights = [zarr.loc_at(*pt) for pt in right_side]
         first_row = lefts[0][0]
@@ -70,25 +71,52 @@ def run():
 
         left = SideSegment(lefts)
         right = SideSegment(rights)
-        
-        print("a", polygon_coords)
-        print("b", lefts, rights, i)
-        print("c", first_row, last_row)
 
-        for row in range(first_row, last_row+1):
+        strides = []
+        for row in range(first_row, last_row + 1):
             start_col = round(left.x_at_y(row))
             end_col = round(right.x_at_y(row))
-            
-            print(row, start_col, end_col)
-
-                
+            strides.append((start_col, end_col))
 
         polygon_bbox = calc_bbox(polygon_coords)
+        west, south, east, north = polygon_bbox
+
+        start_tile_x, start_tile_y = zarr.chunk_at(west, north)
+        stop_tile_x, stop_tile_y = zarr.chunk_at(east, south)
+
+        print(">>", i)
+        for tile_y in range(start_tile_y, stop_tile_y + 1):
+            for tile_x in range(start_tile_x, stop_tile_x + 1):
+                chunk_min_col, chunk_min_row, chunk_max_col, chunk_max_row = zarr.chunk_info(tile_x, tile_y)
+
+                min_alt = math.nan
+                max_alt = math.nan
+                count = 0
+                for row, (start_col, end_col) in zip(range(first_row, last_row + 1), strides):
+                    if chunk_min_row <= row <= chunk_max_row:
+                        for col in range(start_col, end_col + 1):
+                            if chunk_min_col <= col <= chunk_max_col:
+                                alt = zarr.value_at_row_col(row, col)
+                                min_alt = min(alt, min_alt)
+                                max_alt = max(alt, max_alt)
+                                count += 1
+                print(tile_x, tile_y, "/", min_alt, max_alt, ":", count)
+
         altitude = zarr.value_at(*aircraft)
         # print(zarr.x_axis.to_idx(aircraft[0]), zarr.y_axis.to_idx(aircraft[1]), altitude, i)
 
         yield (
-            (aircraft, altitude, azimuth, polygon_coords, polygon_bbox, aircraft_time, aircraft_time_delta, duration, i)
+            (
+                aircraft,
+                altitude,
+                azimuth,
+                polygon_coords,
+                polygon_bbox,
+                aircraft_time,
+                aircraft_time_delta,
+                duration,
+                i,
+            )
         )
 
         aircraft_time_delta += duration

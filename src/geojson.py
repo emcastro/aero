@@ -47,6 +47,20 @@ class GeoJsonWriter:
             self.file,
         )
 
+    def linestring(self, props: Dict, coords: List[Tuple[float, float]]):
+        self.comma()
+        json.dump(
+            {
+                "type": "Feature",
+                "properties": props,
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": coords,
+                },
+            },
+            self.file,
+        )
+
     def polygon(self, props: Dict, coords: List[Tuple[float, float]]):
         self.comma()
         json.dump(

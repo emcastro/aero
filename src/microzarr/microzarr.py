@@ -109,7 +109,47 @@ class Zarr:  # pylint: disable=R0902
         column = self.x_axis.to_idx(x)
         return (row, column)
 
-    @micropython.native
+    def chunk_at(self, x: float, y: float):
+        """
+        Retrieves the chunk indices for the specified coordinates.
+
+        Args:
+            x (float): Longitude.
+            y (float): Latitude.
+
+        Returns:
+            tuple: A tuple containing the chunk indices along the X and Y axes.
+        """
+        row = self.y_axis.to_idx(y)
+        column = self.x_axis.to_idx(x)
+
+        chunk_id_x = column // self.chunk_width
+        chunk_id_y = row // self.chunk_height
+
+        return (chunk_id_x, chunk_id_y)
+
+    def chunk_info(self, chunk_id_x: int, chunk_id_y: int):
+        """
+        Retrieves the boundaries of the specified chunk.
+
+        Args:
+            chunk_id_x (int): Chunk ID along the X-axis.
+            chunk_id_y (int): Chunk ID along the Y-axis.
+
+        Returns:
+            tuple: A tuple containing:
+                - chunk_min_x (int): Minimum X coordinate of the chunk.
+                - chunk_min_y (int): Minimum Y coordinate of the chunk.
+                - chunk_max_x (int): Maximum X coordinate of the chunk.
+                - chunk_max_y (int): Maximum Y coordinate of the chunk.
+        """
+        chunk_min_x = chunk_id_x * self.chunk_width
+        chunk_min_y = chunk_id_y * self.chunk_height
+        chunk_max_x = chunk_min_x + self.chunk_width - 1
+        chunk_max_y = chunk_min_y + self.chunk_height - 1
+
+        return (chunk_min_x, chunk_min_y, chunk_max_x, chunk_max_y)
+
     def value_at(self, x: float, y: float):
         """
         Retrieves the value at the specified coordinates.
@@ -124,7 +164,10 @@ class Zarr:  # pylint: disable=R0902
         zarr_logger.debug("Get value at (%.6f, %.6f)", x, y)
         row = self.y_axis.to_idx(y)
         column = self.x_axis.to_idx(x)
+        return self.value_at_row_col(row, column)
 
+    @micropython.native
+    def value_at_row_col(self, row: int, column: int):
         chunk_width = self.chunk_width
         chunk_height = self.chunk_height
 
@@ -265,7 +308,7 @@ class Axis:
         self.data_file = open(values_path, "rb")  # pylint: disable=R1732
         self.data_size = self.data_file.seek(0, SEEK_END) // COORDINATE_SIZE
 
-        self.one_coord = bytearray(COORDINATE_SIZE)
+        self.one_coord_block = bytearray(COORDINATE_SIZE)
         self.cache_block = bytearray(CACHE_SIZE_BYTES)
         self.cache_start = -CACHE_SIZE_BYTES
         self.start_cache_value = math.nan
@@ -342,8 +385,8 @@ class Axis:
         return self.data_file.readinto(target_block)
 
     def read_one(self, idx: int):
-        self.read_block_into(idx, self.one_coord)
-        return struct.unpack("<d", self.one_coord)[0]  # type: ignore
+        self.read_block_into(idx, self.one_coord_block)
+        return struct.unpack("<d", self.one_coord_block)[0]  # type: ignore
 
     def get_idx_in_current_block(self, local_idx: int):
         data_pos = local_idx * COORDINATE_SIZE
