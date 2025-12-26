@@ -13,7 +13,7 @@ def list_delete_files_recursive(dir_name, *, delete=False, level=0):
         ident = level * " "
         print(ident, fullname)
 
-        if fullname == "/sd/dem.zarr/dem":
+        if fullname == "/sd/dem.zarr":
             print(ident, "-skipped...")
             continue
 
@@ -24,14 +24,11 @@ def list_delete_files_recursive(dir_name, *, delete=False, level=0):
             list_delete_files_recursive(fullname, delete=delete, level=level + 1)
 
         if delete:
-            print(ident, "-deleting", fullname)
-            if fullname == "/sd/dem.zarr":
-                print(ident, " -no deletable")
+            print(ident, "~~~")
+            if directory:
+                os.rmdir(fullname)
             else:
-                if directory:
-                    os.rmdir(fullname)
-                else:
-                    os.unlink(fullname)
+                os.unlink(fullname)
 
 
 if __name__ == "__main__":
