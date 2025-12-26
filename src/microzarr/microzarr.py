@@ -94,6 +94,21 @@ class Zarr:  # pylint: disable=R0902
         self.data = data
         self.data_xy = (None, None)  # Current chunk loaded
 
+    def loc_at(self, x: float, y: float):
+        """
+        Retrieves the location: row and column indices for the specified coordinates.
+
+        Args:
+            x (float): Longitude.
+            y (float): Latitude.
+
+        Returns:
+            tuple: A tuple containing the row and column indices.
+        """
+        row = self.y_axis.to_idx(y)
+        column = self.x_axis.to_idx(x)
+        return (row, column)
+
     @micropython.native
     def value_at(self, x: float, y: float):
         """

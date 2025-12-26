@@ -138,6 +138,12 @@ def argminmax(items: List[float]):
 
 
 def convexpoly_left_right(points: List[Tuple[float, float]]):
+    """
+    Build left and right sides of a convex polygon. Return them as lists of points.
+
+    :param points: Points of a convex polygon
+    :type points: List[Tuple[float, float]]
+    """
     ys = [y for x, y in points]
     idx_min, idx_max = argminmax(ys)
 
@@ -157,3 +163,36 @@ def convexpoly_left_right(points: List[Tuple[float, float]]):
         left = points_down
         right = points_up
     return left, right
+
+
+class SideSegment:
+    """
+    Class that represents a segment of a side of a convex polygon.
+    Objects are statefull. The method x_at_y must be call in increasing order
+    """
+
+    def __init__(self, side: List[Tuple]):
+        self.side = side
+        self.segment_idx = -1
+        self.segment_end_y = -1e9  # lowest possible y in any coordinate system
+        self.coef = 0.0
+        self.base = 0.0
+
+    def x_at_y(self, y):
+        if y > self.segment_end_y:
+            do_it = True
+            while do_it:
+                self.segment_idx += 1
+                self.segment_end_y = self.side[self.segment_idx + 1][0]
+                pt_a = self.side[self.segment_idx]
+                pt_b = self.side[self.segment_idx + 1]
+                do_it = pt_a[0] == pt_b[0]
+
+            self.coef = (pt_b[1] - pt_a[1]) / (pt_b[0] - pt_a[0])
+            self.base = pt_a[1] - self.coef * pt_a[0]
+
+        return y * self.coef + self.base
+
+    def restart(self):
+        self.segment_idx = -1
+        self.segment_end_y = -1e9
