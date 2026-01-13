@@ -1,6 +1,5 @@
 /devdata/
 /devdata2/
-venv
-*.ipynb
+.venv
 __pycache__
 /.vscode
