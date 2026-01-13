@@ -12,6 +12,9 @@ if ! docker image inspect macropython:latest >/dev/null 2>&1; then
     echo "Docker image built successfully. Remove it manually for rebuild"
 fi
 
+# Note current date for use when moving files produced by execution
+CURRENT_DATE=$(date +%Y-%m-%d)
+
 # Lance l'exécution sur un container temporaire micropython/unix en faisant en sorte que le réperoire du code sois /sd/
 # -B: no __pycache__
 #  -Xfrozen_modules=off: enhance debug capabilities
@@ -24,3 +27,6 @@ docker run --rm --interactive --tty \
     --env PYTHONPATH=.:macropython \
     macropython:latest \
     python -B -Xfrozen_modules=off macropython/debug.py "$SCRIPT" "$@" | sed s:/flash:"$DIR/src":
+
+# Find files newer than "$CURRENT_DATE" in "$DIR/src" and move them to "experiments"
+find "$DIR/src" -type f -newermt "$CURRENT_DATE" -exec mv {} "$DIR/experiments" \;
