@@ -13,7 +13,7 @@ if ! docker image inspect macropython:latest >/dev/null 2>&1; then
 fi
 
 # Note current date for use when moving files produced by execution
-CURRENT_DATE=$(date +%Y-%m-%d)
+CURRENT_DATE=$(date +%Y-%m-%d %H:%M:%S)
 
 # Lance l'exécution sur un container temporaire micropython/unix en faisant en sorte que le réperoire du code sois /sd/
 # -B: no __pycache__

@@ -18,3 +18,6 @@ $mpremote cp -r $(find src -mindepth 1 -maxdepth 1 ! -path 'src/macropython' ! -
 
 echo Run
 $mpremote run "$SCRIPT" "$@" | sed -e s:'File "':"File \"$DIR/src/": -e s:'src/<stdin>':"$SCRIPT":
+
+# Move any file that is not source back to experiment
+$mpremote cp :/sd/zones.geojson .
