@@ -8,7 +8,7 @@ SCRIPT="$(realpath --relative-to="$DIR/src" "$1")"
 shift
 
 # Note current date for use when moving files produced by execution
-CURRENT_DATE=$(date +%Y-%m-%d %H:%M:%S)
+CURRENT_DATE=$(date "+%Y-%m-%d %H:%M:%S")
 
 # Launches execution in a temporary micropython/unix container
 # data directory mounted on /sd/
