@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 DIR="$(dirname "$(realpath "$0")")"
 
 SCRIPT="$(realpath --relative-to="$DIR/src" "$1")"
