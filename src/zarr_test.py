@@ -72,11 +72,11 @@ def run():
         left = SideSegment(lefts)
         right = SideSegment(rights)
 
-        strides = []
+        strips = []
         for row in range(first_row, last_row + 1):
             start_col = round(left.x_at_y(row))
             end_col = round(right.x_at_y(row))
-            strides.append((start_col, end_col))
+            strips.append((start_col, end_col))
 
         polygon_bbox = calc_bbox(polygon_coords)
         west, south, east, north = polygon_bbox
@@ -92,7 +92,7 @@ def run():
                 min_alt = math.nan
                 max_alt = math.nan
                 count = 0
-                for row, (start_col, end_col) in zip(range(first_row, last_row + 1), strides):
+                for row, (start_col, end_col) in zip(range(first_row, last_row + 1), strips):
                     if chunk_min_row <= row <= chunk_max_row:
                         for col in range(start_col, end_col + 1):
                             if chunk_min_col <= col <= chunk_max_col:
