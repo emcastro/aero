@@ -5,6 +5,7 @@ uv sync
 . .venv/bin/activate
 rm -rf src/*.egg-info
 rm -rf src/__pycache__
+rm -rf mutants
 
 echo black ===============
 black .

@@ -1,3 +1,5 @@
+# pylint:disable=duplicate-code
+
 import gc
 import time
 
