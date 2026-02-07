@@ -39,7 +39,9 @@ experiments/                # Testing and experimentation notebooks
 typings/                    # Typing stubs for MicroPython (https://micropython-stubs.readthedocs.io)
 ```
 
-All the Python tools must be configured in the pyptoject.toml file.
+## Project configuration
+- All the Python tools MUST be configured in the `pyptoject.toml` file.
+- We use `uv` for package and tool management.
 
 ## Common Tasks
 - Processing elevation data from Zarr stores
@@ -61,7 +63,8 @@ All the Python tools must be configured in the pyptoject.toml file.
 - Stream large datasets rather than loading entirely
 
 ## Test
-- Use pytest
+- Use pytest to run tests
+- Use mutmut for mutation testing
 
 ## Code style
 - Use the f"{dirname}/{basename}" pattern to build pathname, not os.path.join
