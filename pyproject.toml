@@ -12,6 +12,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "pytest>=7.4.0",
   "pyright>=1.1.403",
   "pylint>=3.3.7",
   "isort>=6.0.1",
@@ -22,15 +23,18 @@ dev = [
   "jupyter>=1.1.1",
 ]
 
+[tool.uv]
+package = true
+
 
 [tool.pyright]
 typeCheckingMode = "basic"
 stubPath = "typings"
-typeshedPaths = ["typings"]
 reportMissingModuleSource = false
 
 executionEnvironments = [
   { root = "devtools", pythonVersion = "3.12" },
+  { root = "tests", pythonVersion = "3.12" },
   { root = "src", pythonVersion = "3.10" },
 ]
 
@@ -45,7 +49,6 @@ profile = "black"
 [tool.pylint.main]
 ignore-patterns = ".ipynb"
 ignore = ["typings", "venv", ".venv"]
-source-roots = ["src", "devtools"]
 
 [tool.pylint.format]
 max-line-length = 150

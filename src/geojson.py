@@ -11,14 +11,12 @@ class GeoJsonWriter:
         self.need_comma = False
 
     def __enter__(self):
-        self.file.write(
-            """{
+        self.file.write("""{
             "type": "FeatureCollection",
             "name": "zones",
             "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
             "features": [
-            """
-        )
+            """)
         return self
 
     def comma(self):

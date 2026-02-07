@@ -87,6 +87,7 @@ def run():
         print(">>", i)
         for tile_y in range(start_tile_y, stop_tile_y + 1):
             for tile_x in range(start_tile_x, stop_tile_x + 1):
+                print(f"                                          ({tile_x}, {tile_y})")
                 chunk_min_col, chunk_min_row, chunk_max_col, chunk_max_row = zarr.chunk_info(tile_x, tile_y)
 
                 min_alt = math.nan
@@ -100,7 +101,7 @@ def run():
                                 min_alt = min(alt, min_alt)
                                 max_alt = max(alt, max_alt)
                                 count += 1
-                print(tile_x, tile_y, "/", min_alt, max_alt, ":", count)
+                # print(tile_x, tile_y, "/", min_alt, max_alt, ":", count)
 
         altitude = zarr.value_at(*aircraft)
         # print(zarr.x_axis.to_idx(aircraft[0]), zarr.y_axis.to_idx(aircraft[1]), altitude, i)
@@ -139,9 +140,9 @@ def write_json(result):
             duration,
             i,
         ) in result:
-            (year, month, mday, hour, minute, second, *_) = time.gmtime(aircraft_time + int(aircraft_time_delta))
+            year, month, mday, hour, minute, second, *_ = time.gmtime(aircraft_time + int(aircraft_time_delta))
             date1 = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second:02}Z"
-            (year, month, mday, hour, minute, second, *_) = time.gmtime(
+            year, month, mday, hour, minute, second, *_ = time.gmtime(
                 aircraft_time + int(aircraft_time_delta + duration)
             )
             date2 = f"{year:04}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second:02}Z"

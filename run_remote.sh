@@ -20,6 +20,7 @@ echo Deploy libraries from src
     # For now, we do it simple
     cd src
     find . -name '__pycache__' -exec rm -r {} + # delete residual __pycache__
+    rm -f *.egg-info # delete residual egg-info
     $mpremote cp -r . :/sd
 )
 
