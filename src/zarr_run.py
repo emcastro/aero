@@ -1,6 +1,6 @@
 import gc
 import math
-import time
+import timek
 
 import ulogging
 from geojson import GeoJsonWriter

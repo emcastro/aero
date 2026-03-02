@@ -20,6 +20,7 @@ dev = [
   "geopandas>=1.1.1",
   "matplotlib>=3.10.5",
   "jupyter>=1.1.1",
+  "mutmut>=2.4.0",
 ]
 
 [tool.uv]
