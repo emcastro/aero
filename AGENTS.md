@@ -82,5 +82,6 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 ## Code style
 - Use the f"{dirname}/{basename}" pattern to build pathname, not os.path.join
 - Use typing annotation
+- Do not use return type annotation, unless instructed
 
 When generating code, ensure it integrates seamlessly with the existing project structure and conventions.

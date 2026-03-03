@@ -12,6 +12,6 @@ black .
 echo isort ===============
 isort .
 echo pylint ==============
-pylint .
+pylint src devtools tests
 echo pyright =============
 pyright

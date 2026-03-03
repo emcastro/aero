@@ -8,9 +8,10 @@ R = const(6371008.8)
 
 # Projects a point from lat/lon on the great circle with azimuth alpha (in degrees)
 # at a distance (in meters)
-def wgs84_project_xy(lon: float, lat: float, azimuth: float, distance: float):
+def wgs84_project_xy(lon: float, lat: float, azimuth: float, distance: float) -> Tuple[float, float]:
     """
-    Projects a point from latitude/longitude along a great circle path with a given azimuth and distance.
+    Projects a point from latitude/longitude along a great circle path with a given
+    azimuth and distance (Vicenty formula).
 
     Args:
         lon (float): Longitude of the starting point.
@@ -50,7 +51,7 @@ def wgs84_project_xy(lon: float, lat: float, azimuth: float, distance: float):
     return target_lon, target_lat
 
 
-def wgs84_project(pt: Tuple[float, float], azimuth: float, distance: float) -> Tuple[float, float]:
+def wgs84_project(pt: Tuple[float, float], azimuth: float, distance: float):
     """
     Projects a point along a great circle path with a given azimuth and distance.
     Same implementation as `wgs84_project`, but takes a point tuple as input.
@@ -92,7 +93,8 @@ MINUS_INF = float("-inf")
 PLUS_INF = float("inf")
 
 
-def calc_bbox(coords: List[Tuple[float, float]]) -> Tuple[float, float, float, float]:
+# pylint: disable=consider-using-min-builtin, consider-using-max-builtin
+def calc_bbox(coords: List[Tuple[float, float]]):
     """
     Computes the bounding box for a list of coordinates.
 
@@ -110,13 +112,13 @@ def calc_bbox(coords: List[Tuple[float, float]]) -> Tuple[float, float, float, f
     max_lat = MINUS_INF
 
     for lon, lat in coords:
-        if lon < min_lon:  # pylint: disable=consider-using-min-builtin
+        if lon < min_lon:  # pragma: no mutate
             min_lon = lon
-        if lon > max_lon:  # pylint: disable=consider-using-max-builtin
+        if lon > max_lon:  # pragma: no mutate
             max_lon = lon
-        if lat < min_lat:  # pylint: disable=consider-using-min-builtin
+        if lat < min_lat:  # pragma: no mutate
             min_lat = lat
-        if lat > max_lat:  # pylint: disable=consider-using-max-builtin
+        if lat > max_lat:  # pragma: no mutate
             max_lat = lat
 
     return min_lon, min_lat, max_lon, max_lat
@@ -128,10 +130,10 @@ def argminmax(items: List[float]):
     idx_max = -1
     value_min = PLUS_INF
     for i, item in enumerate(items):
-        if item > value_max:
+        if item > value_max:  # pragma: no mutate
             value_max = item
             idx_min = i
-        if item < value_min:
+        if item < value_min:  # pragma: no mutate
             value_min = item
             idx_max = i
     return idx_min, idx_max
