@@ -1,4 +1,4 @@
-# Agent Configuration Prompt
+# Agent (and Human) Configuration Prompt
 
 You are assisting with a Python geospatial and aerial terrain analysis project. The workspace contains:
 
@@ -64,20 +64,8 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 
 ## Test
 - Use pytest to run tests
-- Use mutmut for mutation testing. When you run `mutmut browse` the
-  browser-based report marks each mutation with an emoji indicating its
-  outcome:
-
-    * 🙁 **survived** – tests still passed; signals a missing or weak test.
-    * 🫥 **no tests** – no test covered that location.
-    * ⏰ **timeout** – the test run timed out on this mutation.
-    * 🤔 **suspicious** – result was inconclusive.
-    * 🔇 **skipped** – mutation wasn’t applied (unsupported spot).
-    * 🧙 **caught by type check** – the type checker prevented the mutation.
-    * 🛑 **check interrupted by user** – you stopped the run.
-    * ? **not checked** – mutation wasn’t evaluated.
-    * 🎉 **killed** – mutation caused a test failure (good).
-    * 💥 **segfault** – mutation crashed the process.
+- Use mutmut for mutation testing.
+- Use the directives of tests/AGENTS.md
 
 ## Code style
 - Use the f"{dirname}/{basename}" pattern to build pathname, not os.path.join

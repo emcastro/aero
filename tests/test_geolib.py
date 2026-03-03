@@ -28,46 +28,46 @@ def test_project_zero_distance():
 
 def test_project_consistency():
     """The tuple wrapper and xy variant must agree."""
-    pt = (10.0, -5.0)
-    az = 123.4
-    d = 10000.0
-    assert wgs84_project(pt, az, d) == wgs84_project_xy(pt[0], pt[1], az, d)
+    point = (10.0, -5.0)
+    azimuth_d = 123.4
+    dist_m = 10000.0
+    assert wgs84_project(point, azimuth_d, dist_m) == wgs84_project_xy(point[0], point[1], azimuth_d, dist_m)
 
 
 def test_azimuth_project_consistency():
     """Project a point and verify azimuth consistency."""
     origins = [(0.0, 0.0), (45.0, 45.0), (-120.0, 30.0)]
-    azims_m = [0.0, 90.0, 225.5, 359.9]
-    dist_l = 1_000_000  # 1000 km
+    azimuths_d = [0.0, 90.0, 225.5, 359.9]
+    dist_m = 1_000_000  # 1000 km
 
-    for p in origins:
-        for az_d in azims_m:
-            dest = wgs84_project(p, az_d, dist_l)
-            az_calc_d = wgs84_azimuth(p, dest)
+    for point in origins:
+        for azimuth_d in azimuths_d:
+            dest = wgs84_project(point, azimuth_d, dist_m)
+            calc_azimuth_d = wgs84_azimuth(point, dest)
             # forward azimuth should equal requested azimuth modulo tolerance
-            assert az_calc_d == pytest.approx(az_d, abs=EPS)
+            assert calc_azimuth_d == pytest.approx(azimuth_d, abs=EPS)
 
 
 def test_azimuth_roundtrip():
     """Project a point and verify azimuth consistency both ways at local scale."""
     origins = [(0.0, 0.0), (45.0, 45.0), (-120.0, 30.0)]
-    azims_d = [0.0, 90.0, 225.5, 359.9]
+    azimuths_d = [0.0, 90.0, 225.5, 359.9]
     dist_m = 10000  # 10 km
 
-    for p in origins:
-        for az in azims_d:
-            dest = wgs84_project(p, az, dist_m)
-            az_calc = wgs84_azimuth(p, dest)
+    for point in origins:
+        for azimuth_d in azimuths_d:
+            dest = wgs84_project(point, azimuth_d, dist_m)
+            calc_azimuth_d = wgs84_azimuth(point, dest)
             # forward azimuth should equal requested azimuth modulo tolerance
-            assert az_calc == pytest.approx(az, abs=EPS)
-            back = wgs84_azimuth(dest, p)
-            expected = (az + 180.0) % 360.0
-            assert back == pytest.approx(expected, abs=0.1)
+            assert calc_azimuth_d == pytest.approx(azimuth_d, abs=EPS)
+            back_azimuth_d = wgs84_azimuth(dest, point)
+            expected_azimuth_d = (azimuth_d + 180.0) % 360.0
+            assert back_azimuth_d == pytest.approx(expected_azimuth_d, abs=0.1)
 
 
 def test_calc_bbox_simple():
-    pts = [(0.0, 0.0), (10.0, -5.0), (-3.0, 4.0), (10.0, 4.0)]
-    assert calc_bbox(pts) == (-3.0, -5.0, 10.0, 4.0)
+    points = [(0.0, 0.0), (10.0, -5.0), (-3.0, 4.0), (10.0, 4.0)]
+    assert calc_bbox(points) == (-3.0, -5.0, 10.0, 4.0)
     assert calc_bbox([(1.0, 1.0)]) == (1.0, 1.0, 1.0, 1.0)
 
 
