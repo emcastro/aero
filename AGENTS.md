@@ -63,6 +63,7 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 - Stream large datasets rather than loading entirely
 
 ## Test
+- Use `uv run` to active the environnement
 - Use pytest to run tests
 - Use mutmut for mutation testing.
 - Use the directives of tests/AGENTS.md
