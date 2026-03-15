@@ -57,7 +57,7 @@ def test_azimuth_project_consistency():
             dest = wgs84_project(point, azimuth_d, dist_m)
             calc_azimuth_d = wgs84_azimuth(point, dest)
             # forward azimuth should equal requested azimuth modulo tolerance
-            geojson(dest, pt_idx, azimuth_d)
+            geojson(dest, pt_idx, azimuth_d,pt_idx=pt_idx, azimuth_d=azimuth_d)
             assert calc_azimuth_d == pytest.approx(azimuth_d, abs=EPS)
 
 
