@@ -49,11 +49,11 @@ def geojson(geometry, *suffix_names, **key_words):
 
 
 def flush():
-    out_dir = pathlib.Path(__file__).resolve().parent / "tests_dataviz"
+    out_dir = pathlib.Path(__file__).resolve().parent.parent / "tests_dataviz"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for test_name, records in GEODATA_STORE.items():
-        out_path = out_dir / f"{test_name}.geojson"
+        out_path = str(out_dir / f"{test_name}.geojson")
 
         schema = {"name": "str"}
         for _, _, _, keywords in records:
@@ -62,7 +62,7 @@ def flush():
                     case str():
                         column_type = "str"
                     case int():
-                        column_type = "int:20"
+                        column_type = "int"
                     case float():
                         column_type = "float"
                     case _:
@@ -74,7 +74,7 @@ def flush():
         schema_props = list(schema["properties"].keys())
 
         with fiona.open(
-            str(out_path),
+            out_path,
             mode="w",
             driver="GeoJSON",
             schema=schema,
