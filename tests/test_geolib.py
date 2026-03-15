@@ -4,12 +4,12 @@ import math
 
 import pytest
 import utest  # pylint: disable=unused-import
+from geodata_dump import geojson
 
-from geolib import (
+from geolib import (  # convexpoly_left_right,
     SideSegment,
     argminmax,
     calc_bbox,
-    convexpoly_left_right,
     wgs84_azimuth,
     wgs84_project,
     wgs84_project_xy,
@@ -22,8 +22,14 @@ METER = 1e-5  # ~1m at the equator
 
 def test_project_zero_distance():
     """Zero distance should return the original point."""
-    assert wgs84_project_xy(0.0, 0.0, 0.0, 0.0) == (0.0, 0.0)
-    assert wgs84_project((12.34, -56.78), 45.0, 0.0) == (12.34, -56.78)
+    point1 = (0.0, 0.0)
+    point2 = (12.34, -56.78)
+    result1 = wgs84_project_xy(point1[0], point1[1], 0.0, 0.0)
+    result2 = wgs84_project(point2, 45.0, 0.0)
+    geojson(point1)
+    geojson(point2)
+    assert result1 == point1
+    assert result2 == point2
 
 
 def test_project_consistency():
@@ -31,7 +37,12 @@ def test_project_consistency():
     point = (10.0, -5.0)
     azimuth_d = 123.4
     dist_m = 10000.0
-    assert wgs84_project(point, azimuth_d, dist_m) == wgs84_project_xy(point[0], point[1], azimuth_d, dist_m)
+    point_result = wgs84_project(point, azimuth_d, dist_m)
+    xy_result = wgs84_project_xy(point[0], point[1], azimuth_d, dist_m)
+    geojson(point)
+    geojson(point_result)
+    geojson(xy_result)
+    assert point_result == xy_result
 
 
 def test_azimuth_project_consistency():
@@ -40,11 +51,13 @@ def test_azimuth_project_consistency():
     azimuths_d = [0.0, 90.0, 225.5, 359.9]
     dist_m = 1_000_000  # 1000 km
 
-    for point in origins:
+    for pt_idx, point in enumerate(origins):
+        geojson(point, pt_idx)
         for azimuth_d in azimuths_d:
             dest = wgs84_project(point, azimuth_d, dist_m)
             calc_azimuth_d = wgs84_azimuth(point, dest)
             # forward azimuth should equal requested azimuth modulo tolerance
+            geojson(dest, pt_idx, azimuth_d)
             assert calc_azimuth_d == pytest.approx(azimuth_d, abs=EPS)
 
 
