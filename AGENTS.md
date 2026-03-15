@@ -3,25 +3,27 @@
 You are assisting with a Python geospatial and aerial terrain analysis project. The workspace contains:
 
 ## Project Context
-- **Language**: MicroPython (it is a subset of Python, with less standard functions)
-- **Project topics**: Zarr (for elevation data), GeoJSON, geographic projections
-- **Purpose**: Aircraft terrain awareness and elevation data processing
-- **Data**: Digital Elevation Models (DEM) in Zarr and HGT formats, geographic grid data
+- **Language**: MicroPython (it is a subset of Python, with less standard functions).
+- **Project topics**: Zarr (for elevation data), GeoJSON, geographic projections.
+- **Purpose**: Aircraft terrain awareness and elevation data processing.
+- **Data**: Digital Elevation Models (DEM) in Zarr and HGT formats, geographic grid data.
 
 ## Key Technologies
-- Zarr: For efficient multi-dimensional array storage and retrieval
-- WGS84 Projection: For geographic coordinate transformations
-- GeoJSON: For geographic feature representation
-- LRU Caching: For performance optimization (to be used with extreme caution)
+- Zarr: For efficient multi-dimensional array storage and retrieval.
+- WGS84 Projection: For geographic coordinate transformations.
+- GeoJSON: For geographic feature representation.
+- LRU Caching: For performance optimization (to be used with extreme caution).
 
 ## Code Style & Preferences
-- Use type hints with custom types from `utyping` module
-- Follow MicroPython conventions where applicable
-- Include docstrings for functions explaining purpose and parameters
-- Use logging via `ulogging` for debugging
-- Optimize for memory efficiency
+- Use type hints with custom types from `utyping` module.
+- Follow MicroPython conventions where applicable.
+- Include docstrings for functions explaining purpose and parameters.
+- Use logging via `ulogging` for debugging.
+- Optimize for memory efficiency.
 - No thrid party libraries can be used for any use because it does not fit the
-  the target microcontroler, except for pytest purpose.  
+  the target microcontroler, except for pytest purpose.
+- Don't use _-prefix for private function, unless stated.
+- Do not guess future requirements. It is the resposability of you human.
 
 ## Project Structure
 ```
@@ -44,33 +46,34 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 - We use `uv` for package and tool management.
 
 ## Common Tasks
-- Processing elevation data from Zarr stores
-- Projecting aircraft positions along great circle paths
-- Calculating terrain warnings and boundaries
-- Working with geographic bounding boxes and polygons
-- Converting between different coordinate systems
+- Processing elevation data from Zarr stores.
+- Projecting aircraft positions along great circle paths.
+- Calculating terrain warnings and boundaries.
+- Working with geographic bounding boxes and polygons.
+- Converting between different coordinate systems.
 
 ## When Assisting
-- Suggest efficient data access patterns for Zarr
-- Consider memory constraints in implementations
-- Recommend geographic accuracy for aviation use cases
-- Maintain consistency with existing code patterns in `src/`
-- Optimize for MicroPython compatibility when relevant
+- Suggest efficient data access patterns for Zarr.
+- Consider memory constraints in implementations.
+- Recommend geographic accuracy for aviation use cases.
+- Maintain consistency with existing code patterns in `src/`.
+- Optimize for MicroPython compatibility when relevant.
 
 ## Performance Considerations
-- Minimize memory allocations in loops
-- Cache geographic calculations where appropriate
-- Stream large datasets rather than loading entirely
+- Minimize memory allocations in loops.
+- Cache geographic calculations where appropriate.
+- Stream large datasets rather than loading entirely.
 
 ## Test
-- Use `uv run` to active the environnement
-- Use pytest to run tests
+- Use `uv run` to active the environnement.
+- Use pytest to run tests.
 - Use mutmut for mutation testing.
-- Use the directives of tests/AGENTS.md
+- Use the directives of tests/AGENTS.md.
 
 ## Code style
-- Use the f"{dirname}/{basename}" pattern to build pathname, not os.path.join
-- Use typing annotation
-- Do not use return type annotation, unless instructed
+- Use the f"{dirname}/{basename}" pattern to build pathname, not os.path.join.
+- Use typing annotation.
+- Do not use return type annotation, unless instructed.
+- Never use defensive coding techniques. In case of doubt, just notify it in the chat.
 
 When generating code, ensure it integrates seamlessly with the existing project structure and conventions.
