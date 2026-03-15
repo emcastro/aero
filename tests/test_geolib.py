@@ -108,3 +108,23 @@ def test_argminmax_empty():
     # for an empty list, both indices should be -1
     assert idx_min == -1
     assert idx_max == -1
+
+
+def test_convexpoly_left_right_square() -> None:
+    # square clockwise starting at bottom-left
+    square = [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (9.0, 15.0), (-2.0, 6.0), (0.0, 3.0)]
+    left, right = convexpoly_left_right(square)
+
+    geodump(square)
+    geodump(left)
+    geodump(right)
+
+    side = SideSegment(right)
+
+    test_points = [(0.0, 3.0), (12.0, 9.0), (9.0, 15.0)]
+    for awaited_x, y in test_points:
+        x = side.x_at_y(y)
+        pt = (x, y)
+        awaited_pt = (awaited_x, y)
+        geodump(pt, x, y)
+        geodump(awaited_pt, awaited_x, y)
