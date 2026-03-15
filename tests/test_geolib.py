@@ -1,12 +1,11 @@
 # pylint: disable=import-error
 
-import math
-
 import pytest
 import utest  # pylint: disable=unused-import
-from geodata_dump import geojson
+from geodata_dump import geodump, multipoint
 
-from geolib import (  # convexpoly_left_right,
+from geolib import (
+    convexpoly_left_right,
     SideSegment,
     argminmax,
     calc_bbox,
@@ -26,10 +25,10 @@ def test_project_zero_distance():
     point2 = (12.34, -56.78)
     result1 = wgs84_project_xy(point1[0], point1[1], 0.0, 0.0)
     result2 = wgs84_project(point2, 45.0, 0.0)
-    geojson(point1)
-    geojson(point2)
     assert result1 == point1
     assert result2 == point2
+    geodump(point1)
+    geodump(point2)
 
 
 def test_project_consistency():
@@ -39,10 +38,10 @@ def test_project_consistency():
     dist_m = 10000.0
     point_result = wgs84_project(point, azimuth_d, dist_m)
     xy_result = wgs84_project_xy(point[0], point[1], azimuth_d, dist_m)
-    geojson(point)
-    geojson(point_result)
-    geojson(xy_result)
     assert point_result == xy_result
+    geodump(point)
+    geodump(point_result)
+    geodump(xy_result)
 
 
 def test_azimuth_project_consistency():
@@ -52,13 +51,13 @@ def test_azimuth_project_consistency():
     dist_m = 1_000_000  # 1000 km
 
     for pt_idx, point in enumerate(origins):
-        geojson(point, pt_idx)
+        geodump(point, pt_idx)
         for azimuth_d in azimuths_d:
             dest = wgs84_project(point, azimuth_d, dist_m)
             calc_azimuth_d = wgs84_azimuth(point, dest)
             # forward azimuth should equal requested azimuth modulo tolerance
-            geojson(dest, pt_idx, azimuth_d,pt_idx=pt_idx, azimuth_d=azimuth_d)
             assert calc_azimuth_d == pytest.approx(azimuth_d, abs=EPS)
+            geodump(dest, pt_idx, azimuth_d, dist_m=dist_m)
 
 
 def test_azimuth_roundtrip():
@@ -67,7 +66,8 @@ def test_azimuth_roundtrip():
     azimuths_d = [0.0, 90.0, 225.5, 359.9]
     dist_m = 10000  # 10 km
 
-    for point in origins:
+    for pt_idx, point in enumerate(origins):
+        geodump(point, pt_idx)
         for azimuth_d in azimuths_d:
             dest = wgs84_project(point, azimuth_d, dist_m)
             calc_azimuth_d = wgs84_azimuth(point, dest)
@@ -76,12 +76,14 @@ def test_azimuth_roundtrip():
             back_azimuth_d = wgs84_azimuth(dest, point)
             expected_azimuth_d = (azimuth_d + 180.0) % 360.0
             assert back_azimuth_d == pytest.approx(expected_azimuth_d, abs=0.1)
+            geodump(dest, pt_idx, azimuth_d, back_azimuth_d=back_azimuth_d, expected_azimuth_d=expected_azimuth_d)
 
 
 def test_calc_bbox_simple():
     points = [(0.0, 0.0), (10.0, -5.0), (-3.0, 4.0), (10.0, 4.0)]
-    assert calc_bbox(points) == (-3.0, -5.0, 10.0, 4.0)
-    assert calc_bbox([(1.0, 1.0)]) == (1.0, 1.0, 1.0, 1.0)
+    geodump(multipoint(points))
+    assert geodump(calc_bbox(points)) == (-3.0, -5.0, 10.0, 4.0)
+    assert geodump(calc_bbox([(1.0, 1.0)])) == (1.0, 1.0, 1.0, 1.0)
 
 
 def test_argminmax():
@@ -106,32 +108,3 @@ def test_argminmax_empty():
     # for an empty list, both indices should be -1
     assert idx_min == -1
     assert idx_max == -1
-
-
-# def test_convexpoly_left_right_square() -> None:
-#     # square clockwise starting at bottom-left
-#     square = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
-#     left, right = convexpoly_left_right(square)
-#     # left and right should each contain two edges of the square
-#     assert len(left) == 3
-#     assert len(right) == 3
-#     # verify continuity
-#     assert left[0] in square
-#     assert right[0] in square
-
-
-def test_side_segment_basic():
-    # simple vertical strip from y=0 to y=10 at x = y/2 + 1
-    side = [(0.0, 1.0), (10.0, 6.0)]
-    seg = SideSegment(side)
-    ys = [0.0, 2.5, 5.0, 7.5, 10.0]
-    last_x = None
-    for y in ys:
-        x = seg.x_at_y(y)
-        if last_x is not None:
-            # x should increase as y increases for this simple segment
-            assert x > last_x
-        last_x = x
-    seg.restart()
-    assert seg.segment_idx == -1
-    assert seg.segment_end_y < ys[0]

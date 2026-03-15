@@ -170,7 +170,8 @@ def convexpoly_left_right(points: List[Tuple[float, float]]):
 class SideSegment:
     """
     Class that represents a segment of a side of a convex polygon.
-    Objects are statefull. The method x_at_y must be call in increasing order
+    Objects are statefull. The method x_at_y must be call in increasing order of y.
+    The object is stateful. If it has to be called multiple times, do use `restart()`
     """
 
     def __init__(self, side: List[Tuple]):
@@ -182,13 +183,14 @@ class SideSegment:
 
     def x_at_y(self, y):
         if y > self.segment_end_y:
-            do_it = True
-            while do_it:
+            searching = True
+            while searching:
                 self.segment_idx += 1
                 self.segment_end_y = self.side[self.segment_idx + 1][0]
                 pt_a = self.side[self.segment_idx]
                 pt_b = self.side[self.segment_idx + 1]
-                do_it = pt_a[0] == pt_b[0]
+                # Continue searching if the segment is empty
+                searching = pt_a[0] == pt_b[0]
 
             self.coef = (pt_b[1] - pt_a[1]) / (pt_b[0] - pt_a[0])
             self.base = pt_a[1] - self.coef * pt_a[0]

@@ -1,8 +1,9 @@
 import fiona
 import pathlib
 import inspect
-import re
-
+from numbers import Number
+from collections.abc import Sequence
+import ast
 
 def get_test_name():
     stack = inspect.stack()
@@ -18,6 +19,21 @@ def get_test_name():
         del stack
     return "unknown_test"
 
+def extract_argument(code: str, function_name: str):
+    # Parse le code en un arbre syntaxique
+    arbre = ast.parse(code)
+
+    # Parcourt l'arbre pour trouver l'appel à calc_bbox
+    for noeud in ast.walk(arbre):
+        if isinstance(noeud, ast.Call):
+            # Vérifie si la fonction appelée est calc_bbox
+            if isinstance(noeud.func, ast.Name) and noeud.func.id == function_name:
+                # Le premier argument est noeud.args[0]
+                if noeud.args:
+                    # Convertit l'AST de l'argument en code source
+                    return ast.unparse(noeud.args[0])
+    return None
+
 
 def get_first_arg_source() -> str:
     frame = inspect.currentframe()
@@ -29,9 +45,9 @@ def get_first_arg_source() -> str:
 
         # Try to extract the first argument expression from a call like:
         # geojson(point_result)
-        matcher = re.search(r"\bgeojson\s*\(\s*([^,\)]+)", call_line)
-        if matcher:
-            return matcher.group(1).strip()
+        argument = extract_argument(call_line, "geodump")
+        if argument is not None:
+            return argument
     finally:
         del frame
     return "<unnkown>"
@@ -39,13 +55,23 @@ def get_first_arg_source() -> str:
 
 GEODATA_STORE = {}
 
+def multipoint(points):
+    return {"type": "MultiPoint", "coordinates": points}
 
-def geojson(geometry, *suffix_names, **key_words):
+def geodump(geometry, *suffix_names, **keywords):
+    """Dump a geometry to a test file for visualizing test output on a map.
+
+    The generated GeoJSON can be opened in tools like QGIS to inspect the data.
+
+    The text of the `geometry` argument is used as the feature name in the file (along with any `suffix_names`).
+    Values passed via keyword arguments are stored as additional properties on the feature.
+    """
     test_name = get_test_name()
     geom_name = get_first_arg_source()
     if test_name not in GEODATA_STORE:
         GEODATA_STORE[test_name] = []
-    GEODATA_STORE[test_name].append((geometry, geom_name, suffix_names, key_words))
+    GEODATA_STORE[test_name].append((to_geojson(geometry), geom_name, suffix_names, keywords))
+    return geometry
 
 
 def flush():
@@ -81,12 +107,11 @@ def flush():
             crs="EPSG:4326",
         ) as dst:
             for geom, name, suffixes, keywords in records:
-                geo = to_geojson(geom)
-                if geo is None:
+                if geom is None:
                     continue
                 dst.write(
                     {
-                        "geometry": geo,
+                        "geometry": geom,
                         "properties": make_props(name, suffixes, keywords, schema_props),
                     }
                 )
@@ -109,23 +134,33 @@ def make_props(name, suffixes, keywords, schema_props):
     return props
 
 
+def isnum(value):
+    return isinstance(value, Number)
+
+
 def to_geojson(value):
-    if value is None:
-        return None
-    # If already a GeoJSON dict, assume valid
-    if isinstance(value, dict) and "type" in value and "coordinates" in value:
-        return value
-    # Point-like
-    if isinstance(value, (list, tuple)) and len(value) == 2 and not isinstance(value[0], (list, tuple)):
-        return {"type": "Point", "coordinates": [float(value[0]), float(value[1])]}  # type: ignore
-    # Sequence of coordinates: LineString or Polygon
-    if isinstance(value, (list, tuple)):
-        coords = []
-        for v in value:
-            if not isinstance(v, (list, tuple)) or len(v) != 2:
-                raise ValueError("Unsupported geometry coordinate format")
-            coords.append([float(v[0]), float(v[1])])  # type: ignore
-        if len(coords) >= 4 and coords[0] == coords[-1]:
-            return {"type": "Polygon", "coordinates": [coords]}
-        return {"type": "LineString", "coordinates": coords}
-    raise ValueError(f"Unsupported geometry type: {type(value)}")
+    match value:
+        case None:
+            return None
+        case {"type": _, "coordinates": _}:
+            # Si c'est déjà un dictionnaire GeoJSON valide
+            return value
+        case [x, y] if isnum(x) and isnum(y):
+            # Point : 2 values
+            return {"type": "Point", "coordinates": [x, y]}
+        case [xmin, ymin, xmax, ymax] if isnum(xmin) and isnum(ymin) and isnum(xmax) and isnum(ymax):
+            # Bbox : 4 values
+            return {
+                "type": "Polygon",
+                "coordinates": [[[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]],
+            }
+        case _ if isinstance(value, Sequence):
+            # Sequence of coordinates: LineString ou Polygon
+            coords = []
+            for [x, y] in value:
+                coords.append([x, y])
+            if len(coords) >= 4 and coords[0] == coords[-1]:
+                return {"type": "Polygon", "coordinates": [coords]}
+            return {"type": "LineString", "coordinates": coords}
+        case _:
+            raise ValueError(f"Unsupported geometry type: {type(value)}")
