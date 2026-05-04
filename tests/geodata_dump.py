@@ -1,9 +1,11 @@
-import fiona
-import pathlib
-import inspect
-from numbers import Number
-from collections.abc import Sequence
 import ast
+import inspect
+import pathlib
+from collections.abc import Sequence
+from numbers import Number
+
+import fiona
+
 
 def get_test_name():
     stack = inspect.stack()
@@ -18,6 +20,7 @@ def get_test_name():
         # Avoid reference cycles
         del stack
     return "unknown_test"
+
 
 def extract_argument(code: str, function_name: str):
     # Parse le code en un arbre syntaxique
@@ -38,13 +41,33 @@ def extract_argument(code: str, function_name: str):
 def get_first_arg_source() -> str:
     frame = inspect.currentframe()
     try:
-        # Walk back to the caller of the function that invoked this helper
         caller_frame = frame.f_back.f_back  # type: ignore
-        source_lines = inspect.getframeinfo(caller_frame).code_context  # type: ignore
-        call_line = "".join(source_lines).strip()  # type: ignore
+        frame_info = inspect.getframeinfo(caller_frame)
+        source_lines = frame_info.code_context  # type: ignore
+        start_lineno = frame_info.lineno  # type: ignore
 
-        # Try to extract the first argument expression from a call like:
-        # geojson(point_result)
+        # TODO check correctness
+        # Accumulate lines until parentheses are balanced
+        full_code = ""
+        open_parens = 0
+        for line in source_lines:
+            full_code += line
+            open_parens += line.count("(") - line.count(")")
+            if open_parens <= 0 and "(" in full_code:
+                break
+
+        # # If still unbalanced, read remaining lines from the source file
+        if open_parens > 0 and frame_info.filename:
+            with open(frame_info.filename) as f:
+                all_lines = f.readlines()
+            for i in range(start_lineno, len(all_lines)):
+                line = all_lines[i]
+                full_code += line
+                open_parens += line.count("(") - line.count(")")
+                if open_parens <= 0:
+                    break
+
+        call_line = full_code.strip()
         argument = extract_argument(call_line, "geodump")
         if argument is not None:
             return argument
@@ -55,8 +78,10 @@ def get_first_arg_source() -> str:
 
 GEODATA_STORE = {}
 
+
 def multipoint(points):
     return {"type": "MultiPoint", "coordinates": points}
+
 
 def geodump(geometry, *suffix_names, **keywords):
     """Dump a geometry to a test file for visualizing test output on a map.

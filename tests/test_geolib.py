@@ -5,10 +5,10 @@ import utest  # pylint: disable=unused-import
 from geodata_dump import geodump, multipoint
 
 from geolib import (
-    convexpoly_left_right,
-    SideSegment,
+    SideSegmentInterpolator,
     argminmax,
     calc_bbox,
+    convexpoly_left_right,
     wgs84_azimuth,
     wgs84_project,
     wgs84_project_xy,
@@ -76,7 +76,13 @@ def test_azimuth_roundtrip():
             back_azimuth_d = wgs84_azimuth(dest, point)
             expected_azimuth_d = (azimuth_d + 180.0) % 360.0
             assert back_azimuth_d == pytest.approx(expected_azimuth_d, abs=0.1)
-            geodump(dest, pt_idx, azimuth_d, back_azimuth_d=back_azimuth_d, expected_azimuth_d=expected_azimuth_d)
+            geodump(
+                dest,
+                pt_idx,
+                azimuth_d,
+                back_azimuth_d=back_azimuth_d,
+                expected_azimuth_d=expected_azimuth_d,
+            )
 
 
 def test_calc_bbox_simple():
@@ -110,21 +116,83 @@ def test_argminmax_empty():
     assert idx_max == -1
 
 
-def test_convexpoly_left_right_square() -> None:
-    # square clockwise starting at bottom-left
-    square = [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (9.0, 15.0), (-2.0, 6.0), (0.0, 3.0)]
-    left, right = convexpoly_left_right(square)
+## TODO round robin test, clockwise and anti-clockwise
 
-    geodump(square)
+
+def test_convexpoly_left_right_rotations():
+    """Test convexpoly_left_right with all possible rotations of the polygon."""
+    # Original polygon data without the trailing first point
+    unclosed_polygon = [
+        (0.0, 3.0),
+        (-2.0, 6.0),
+        (8.0, 15.0),
+        # (9.0, 15.0),
+        (12.0, 10.0),
+        (12.0, 9.0),
+        # (6.0, 3.0),
+    ]
+
+    # Expected results for the original polygon
+    expected_left = [(0.0, 3.0), (-2.0, 6.0), (8.0, 15.0)]
+    expected_right = [
+        (0.0, 3.0),
+        #   (6.0, 3.0),
+        (12.0, 9.0),
+        (12.0, 10.0),
+        #   (9.0, 15.0),
+        (8.0, 15.0),
+    ]
+
+    # Test all rotations of the polygon
+    for rotation in range(len(unclosed_polygon)):
+        # Rotate the polygon by removing the first element and appending it at the end
+        rotated_polygon = unclosed_polygon[rotation:] + unclosed_polygon[:rotation]
+        rotated_polygon.append(rotated_polygon[0])
+
+        # Action
+        left, right = convexpoly_left_right(rotated_polygon)
+
+        # # Assertion
+        assert left == expected_left
+        assert right == expected_right
+
+        # Visualization
+        geodump(rotated_polygon, rotation)
+        geodump(left, rotation)
+        geodump(right, rotation)
+
+
+def test_sidesemgentinterpolator_x_at_y() -> None:
+    # polygon anti-clockwise starting at bottom
+    polygon = [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (12.0, 10.0), (9.0, 15.0), (8.0, 15.0), (-2.0, 6.0), (0.0, 3.0)]
+    polygon.reverse()
+
+    # polygon = [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (12.0, 10.0), (9.0, 15.0),(8.0, 15.0), (-2.0, 6.0), (0.0, 3.0)]
+    left, right = convexpoly_left_right(polygon)
+
+    assert left == [(0.0, 3.0), (-2.0, 6.0), (8.0, 15.0)]
+    assert right == [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (12.0, 10.0), (9.0, 15.0), (8.0, 15.0)]
+
+    geodump(polygon)
     geodump(left)
     geodump(right)
 
-    side = SideSegment(right)
+    right_side = SideSegmentInterpolator(right)
 
-    test_points = [(0.0, 3.0), (12.0, 9.0), (9.0, 15.0)]
-    for awaited_x, y in test_points:
-        x = side.x_at_y(y)
+    right_test_points = [(6.0, 3.0), (7.0, 4.0), (12.0, 9.0), (12.0, 9.5), (12.0, 10.0), (11.4, 11.0), (9.0, 15.0)]
+    for awaited_x, y in right_test_points:
+        x = right_side.x_at_y(y)
         pt = (x, y)
-        awaited_pt = (awaited_x, y)
-        geodump(pt, x, y)
-        geodump(awaited_pt, awaited_x, y)
+        right_awaited_pt = (awaited_x, y)
+        # geodump(pt, "right", x, y)
+        geodump(right_awaited_pt, awaited_x, y)
+
+    left_side = SideSegmentInterpolator(right)
+
+    left_test_points = [(0.0, 3.0), (-1.0, 4.5), (-2.0, 6.0), (0.25, 8.0), (8.0, 15.0)]
+    for awaited_x, y in left_test_points:
+        x = left_side.x_at_y(y)
+        pt = (x, y)
+        left_awaited_pt = (awaited_x, y)
+        # geodump(pt, "right", x, y)
+        geodump(left_awaited_pt, awaited_x, y)

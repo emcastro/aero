@@ -69,10 +69,11 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 - Use pytest to run tests.
 - Use mutmut for mutation testing.
 - Use the directives of tests/AGENTS.md.
+- When using assert, don't add explanation text.
 
 ## Code style
 - Use the f"{dirname}/{basename}" pattern to build pathname, not os.path.join.
-- Use typing annotation.
+- Use typing annotation, but not for function return type.
 - Do not use return type annotation, unless instructed.
 - Never use defensive coding techniques. In case of doubt, just notify it in the chat.
 

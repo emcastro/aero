@@ -4,7 +4,12 @@ import time
 
 import ulogging
 from geojson import GeoJsonWriter
-from geolib import SideSegment, calc_bbox, convexpoly_left_right, wgs84_project
+from geolib import (
+    SideSegmentInterpolator,
+    calc_bbox,
+    convexpoly_left_right,
+    wgs84_project,
+)
 from microzarr import Zarr
 from utyping import Tuple
 
@@ -69,8 +74,8 @@ def run():
         first_row = lefts[0][0]
         last_row = lefts[-1][0]
 
-        left = SideSegment(lefts)
-        right = SideSegment(rights)
+        left = SideSegmentInterpolator(lefts)
+        right = SideSegmentInterpolator(rights)
 
         strips = []
         for row in range(first_row, last_row + 1):

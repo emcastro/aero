@@ -149,6 +149,9 @@ def convexpoly_left_right(points: List[Tuple[float, float]]):
     ys = [y for x, y in points]
     idx_min, idx_max = argminmax(ys)
 
+    # up: small y to big y
+    # down: big y to small
+
     if idx_min < idx_max:
         points_down = points[idx_min : idx_max + 1]
         points_up = points[idx_max:] + points[1 : idx_min + 1]
@@ -156,18 +159,18 @@ def convexpoly_left_right(points: List[Tuple[float, float]]):
         points_down = points[idx_min:] + points[1 : idx_max + 1]
         points_up = points[idx_max : idx_min + 1]
 
-    if points_down[0][0] < points_down[1][0]:
-        points_up.reverse()
-        left = points_up
-        right = points_down
-    else:
-        points_up.reverse()
+    if points_up[0][0] < points_up[1][0]:
+        points_down.reverse()
         left = points_down
         right = points_up
+    else:
+        points_down.reverse()
+        left = points_up
+        right = points_down
     return left, right
 
 
-class SideSegment:
+class SideSegmentInterpolator:
     """
     Class that represents a segment of a side of a convex polygon.
     Objects are statefull. The method x_at_y must be call in increasing order of y.
@@ -189,10 +192,10 @@ class SideSegment:
                 self.segment_end_y = self.side[self.segment_idx + 1][0]
                 pt_a = self.side[self.segment_idx]
                 pt_b = self.side[self.segment_idx + 1]
-                # Continue searching if the segment is empty
-                searching = pt_a[0] == pt_b[0]
-
-            self.coef = (pt_b[1] - pt_a[1]) / (pt_b[0] - pt_a[0])
+                # Continue searching if the segment is horizontal (occurs only on right segment)
+                searching = pt_a[1] == pt_b[1]
+            # ...
+            self.coef = (pt_b[0] - pt_a[0]) / (pt_b[1] - pt_a[1])
             self.base = pt_a[1] - self.coef * pt_a[0]
 
         return y * self.coef + self.base

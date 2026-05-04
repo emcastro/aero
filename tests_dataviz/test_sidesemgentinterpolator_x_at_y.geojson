@@ -1,0 +1,22 @@
+{
+"type": "FeatureCollection",
+"name": "test_sidesemgentinterpolator_x_at_y",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "name": "polygon" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ], [ 9.0, 15.0 ], [ 12.0, 10.0 ], [ 12.0, 9.0 ], [ 6.0, 3.0 ], [ 0.0, 3.0 ] ] ] } },
+{ "type": "Feature", "properties": { "name": "left" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "right" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ 6.0, 3.0 ], [ 12.0, 9.0 ], [ 12.0, 10.0 ], [ 9.0, 15.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "right_awaited_pt-6.0-3.0" }, "geometry": { "type": "Point", "coordinates": [ 6.0, 3.0 ] } },
+{ "type": "Feature", "properties": { "name": "right_awaited_pt-7.0-4.0" }, "geometry": { "type": "Point", "coordinates": [ 7.0, 4.0 ] } },
+{ "type": "Feature", "properties": { "name": "right_awaited_pt-12.0-9.0" }, "geometry": { "type": "Point", "coordinates": [ 12.0, 9.0 ] } },
+{ "type": "Feature", "properties": { "name": "right_awaited_pt-12.0-9.5" }, "geometry": { "type": "Point", "coordinates": [ 12.0, 9.5 ] } },
+{ "type": "Feature", "properties": { "name": "right_awaited_pt-12.0-10.0" }, "geometry": { "type": "Point", "coordinates": [ 12.0, 10.0 ] } },
+{ "type": "Feature", "properties": { "name": "right_awaited_pt-11.4-11.0" }, "geometry": { "type": "Point", "coordinates": [ 11.4, 11.0 ] } },
+{ "type": "Feature", "properties": { "name": "right_awaited_pt-9.0-15.0" }, "geometry": { "type": "Point", "coordinates": [ 9.0, 15.0 ] } },
+{ "type": "Feature", "properties": { "name": "left_awaited_pt-0.0-3.0" }, "geometry": { "type": "Point", "coordinates": [ 0.0, 3.0 ] } },
+{ "type": "Feature", "properties": { "name": "left_awaited_pt--1.0-4.5" }, "geometry": { "type": "Point", "coordinates": [ -1.0, 4.5 ] } },
+{ "type": "Feature", "properties": { "name": "left_awaited_pt--2.0-6.0" }, "geometry": { "type": "Point", "coordinates": [ -2.0, 6.0 ] } },
+{ "type": "Feature", "properties": { "name": "left_awaited_pt-0.25-8.0" }, "geometry": { "type": "Point", "coordinates": [ 0.25, 8.0 ] } },
+{ "type": "Feature", "properties": { "name": "left_awaited_pt-8.0-15.0" }, "geometry": { "type": "Point", "coordinates": [ 8.0, 15.0 ] } }
+]
+}

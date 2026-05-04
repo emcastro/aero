@@ -1,0 +1,22 @@
+{
+"type": "FeatureCollection",
+"name": "test_convexpoly_left_right_rotations",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "name": "rotated_polygon-0" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ], [ 12.0, 10.0 ], [ 12.0, 9.0 ], [ 0.0, 3.0 ] ] ] } },
+{ "type": "Feature", "properties": { "name": "left-0" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "right-0" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ 12.0, 9.0 ], [ 12.0, 10.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "rotated_polygon-1" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -2.0, 6.0 ], [ 8.0, 15.0 ], [ 12.0, 10.0 ], [ 12.0, 9.0 ], [ 0.0, 3.0 ], [ -2.0, 6.0 ] ] ] } },
+{ "type": "Feature", "properties": { "name": "left-1" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "right-1" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ 12.0, 9.0 ], [ 12.0, 10.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "rotated_polygon-2" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 8.0, 15.0 ], [ 12.0, 10.0 ], [ 12.0, 9.0 ], [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ] ] ] } },
+{ "type": "Feature", "properties": { "name": "left-2" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "right-2" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ 12.0, 9.0 ], [ 12.0, 10.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "rotated_polygon-3" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 12.0, 10.0 ], [ 12.0, 9.0 ], [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ], [ 12.0, 10.0 ] ] ] } },
+{ "type": "Feature", "properties": { "name": "left-3" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "right-3" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ 12.0, 9.0 ], [ 12.0, 10.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "rotated_polygon-4" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 12.0, 9.0 ], [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ], [ 12.0, 10.0 ], [ 12.0, 9.0 ] ] ] } },
+{ "type": "Feature", "properties": { "name": "left-4" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ -2.0, 6.0 ], [ 8.0, 15.0 ] ] } },
+{ "type": "Feature", "properties": { "name": "right-4" }, "geometry": { "type": "LineString", "coordinates": [ [ 0.0, 3.0 ], [ 12.0, 9.0 ], [ 12.0, 10.0 ], [ 8.0, 15.0 ] ] } }
+]
+}
