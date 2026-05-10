@@ -11,7 +11,7 @@ R = const(6371008.8)
 def wgs84_project_xy(lon: float, lat: float, azimuth: float, distance: float) -> Tuple[float, float]:
     """
     Projects a point from latitude/longitude along a great circle path with a given
-    azimuth and distance (Vicenty formula).
+    azimuth and distance (Vincenty formula).
 
     Args:
         lon (float): Longitude of the starting point.
@@ -173,7 +173,7 @@ def convexpoly_left_right(points: List[Tuple[float, float]]):
 class SideSegmentInterpolator:
     """
     Class that represents a segment of a side of a convex polygon.
-    Objects are statefull. The method x_at_y must be call in increasing order of y.
+    Objects are stateful. The method x_at_y must be called in increasing order of y.
     The object is stateful. If it has to be called multiple times, do use `restart()`
     """
 

@@ -1,4 +1,4 @@
-# logging.py - A simple logging module for MicroPython
+# ulogging.py - A simple logging module for MicroPython
 # Original source: https://github.com/erikdelange/MicroPython-Logging
 # Licence: https://raw.githubusercontent.com/erikdelange/MicroPython-Logging/refs/heads/main/LICENSE
 

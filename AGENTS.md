@@ -20,10 +20,10 @@ You are assisting with a Python geospatial and aerial terrain analysis project. 
 - Include docstrings for functions explaining purpose and parameters.
 - Use logging via `ulogging` for debugging.
 - Optimize for memory efficiency.
-- No thrid party libraries can be used for any use because it does not fit the
-  the target microcontroler, except for pytest purpose.
+- No third party libraries can be used for any use because it does not fit the
+  the target microcontroller, except for pytest purpose.
 - Don't use _-prefix for private function, unless stated.
-- Do not guess future requirements. It is the resposability of you human.
+- Do not guess future requirements. It is the responsibility of you human.
 
 ## Project Structure
 ```
@@ -33,7 +33,6 @@ src/
   ├── geojson.py            # GeoJSON handling
   ├── ulogging.py           # Custom logging module
   ├── utyping.py            # Type definitions
-  ├── lru_cache.py          # Caching utilities
   ├── microzarr/            # Zarr library implementation
   └── macropython/          # MicroPython compatibility
 devdata/                    # Sample DEM data in multiple formats
@@ -42,7 +41,7 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 ```
 
 ## Project configuration
-- All the Python tools MUST be configured in the `pyptoject.toml` file.
+- All the Python tools MUST be configured in the `pyproject.toml` file.
 - We use `uv` for package and tool management.
 
 ## Common Tasks
@@ -65,7 +64,7 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 - Stream large datasets rather than loading entirely.
 
 ## Test
-- Use `uv run` to active the environnement.
+- Use `uv run` to activate the environment.
 - Use pytest to run tests.
 - Use mutmut for mutation testing.
 - Use the directives of tests/AGENTS.md.

@@ -162,7 +162,7 @@ def test_convexpoly_left_right_rotations():
         geodump(right, rotation)
 
 
-def test_sidesemgentinterpolator_x_at_y() -> None:
+def test_sidesegmentinterpolator_x_at_y() -> None:
     # polygon anti-clockwise starting at bottom
     polygon = [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (12.0, 10.0), (9.0, 15.0), (8.0, 15.0), (-2.0, 6.0), (0.0, 3.0)]
     polygon.reverse()

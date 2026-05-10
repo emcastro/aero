@@ -6,7 +6,7 @@ import time
 # Emulate the micropython module in a way that is compatible with Python
 
 
-# Emulate microptyhon decorators
+# Emulate micropython decorators
 def identity_decorator(func):
     return func
 

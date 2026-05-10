@@ -251,7 +251,7 @@ def match_json_template(template_name: str, json_filepath: str) -> dict:
 
         elif template_type is dict:
             # Check if each item of the template is present in the data
-            # Additionnal elements are ignored
+            # Additional elements are ignored
             for key, value in template.items():
                 if key not in data:
                     raise ZarrError(f"Key {key} not found in data at path {path}")

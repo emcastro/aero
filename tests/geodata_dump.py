@@ -73,7 +73,7 @@ def get_first_arg_source() -> str:
             return argument
     finally:
         del frame
-    return "<unnkown>"
+    return "<unknown>"
 
 
 GEODATA_STORE = {}
