@@ -189,7 +189,7 @@ class SideSegmentInterpolator:
             searching = True
             while searching:
                 self.segment_idx += 1
-                self.segment_end_y = self.side[self.segment_idx + 1][0]
+                self.segment_end_y = self.side[self.segment_idx + 1][1]
                 pt_a = self.side[self.segment_idx]
                 pt_b = self.side[self.segment_idx + 1]
                 # Continue searching if the segment is horizontal (occurs only on right segment)

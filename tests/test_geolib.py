@@ -164,14 +164,14 @@ def test_convexpoly_left_right_rotations():
 
 def test_sidesegmentinterpolator_x_at_y() -> None:
     # polygon anti-clockwise starting at bottom
-    polygon = [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (12.0, 10.0), (9.0, 15.0), (8.0, 15.0), (-2.0, 6.0), (0.0, 3.0)]
+    polygon = [(0.0, 103.0), (6.0, 103.0), (12.0, 109.0), (12.0, 110.0), (9.0, 115.0), (8.0, 115.0), (-2.0, 106.0), (0.0, 103.0)]
     polygon.reverse()
 
-    # polygon = [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (12.0, 10.0), (9.0, 15.0),(8.0, 15.0), (-2.0, 6.0), (0.0, 3.0)]
+    # polygon = [(0.0, 103.0), (6.0, 103.0), (12.0, 109.0), (12.0, 110.0), (9.0, 115.0),(8.0, 115.0), (-2.0, 106.0), (0.0, 103.0)]
     left, right = convexpoly_left_right(polygon)
 
-    assert left == [(0.0, 3.0), (-2.0, 6.0), (8.0, 15.0)]
-    assert right == [(0.0, 3.0), (6.0, 3.0), (12.0, 9.0), (12.0, 10.0), (9.0, 15.0), (8.0, 15.0)]
+    assert left == [(0.0, 103.0), (-2.0, 106.0), (8.0, 115.0)]
+    assert right == [(0.0, 103.0), (6.0, 103.0), (12.0, 109.0), (12.0, 110.0), (9.0, 115.0), (8.0, 115.0)]
 
     geodump(polygon)
     geodump(left)
@@ -179,7 +179,7 @@ def test_sidesegmentinterpolator_x_at_y() -> None:
 
     right_side = SideSegmentInterpolator(right)
 
-    right_test_points = [(6.0, 3.0), (7.0, 4.0), (12.0, 9.0), (12.0, 9.5), (12.0, 10.0), (11.4, 11.0), (9.0, 15.0)]
+    right_test_points = [(6.0, 103.0), (7.0, 104.0), (12.0, 109.0), (12.0, 109.5), (12.0, 110.0), (11.4, 111.0), (9.0, 115.0)]
     for awaited_x, y in right_test_points:
         x = right_side.x_at_y(y)
         pt = (x, y)
@@ -189,7 +189,7 @@ def test_sidesegmentinterpolator_x_at_y() -> None:
 
     left_side = SideSegmentInterpolator(right)
 
-    left_test_points = [(0.0, 3.0), (-1.0, 4.5), (-2.0, 6.0), (0.25, 8.0), (8.0, 15.0)]
+    left_test_points = [(0.0, 103.0), (-1.0, 104.5), (-2.0, 106.0), (0.25, 108.0), (8.0, 115.0)]
     for awaited_x, y in left_test_points:
         x = left_side.x_at_y(y)
         pt = (x, y)
