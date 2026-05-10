@@ -23,18 +23,18 @@ def get_test_name():
 
 
 def extract_argument(code: str, function_name: str):
-    # Parse le code en un arbre syntaxique
-    arbre = ast.parse(code)
+    # Parse the code into an AST
+    tree = ast.parse(code)
 
-    # Parcourt l'arbre pour trouver l'appel à calc_bbox
-    for noeud in ast.walk(arbre):
-        if isinstance(noeud, ast.Call):
-            # Vérifie si la fonction appelée est calc_bbox
-            if isinstance(noeud.func, ast.Name) and noeud.func.id == function_name:
-                # Le premier argument est noeud.args[0]
-                if noeud.args:
-                    # Convertit l'AST de l'argument en code source
-                    return ast.unparse(noeud.args[0])
+    # Walk the tree to find the function call
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            # Check if the called function matches
+            if isinstance(node.func, ast.Name) and node.func.id == function_name:
+                # The first argument is node.args[0]
+                if node.args:
+                    # Convert the argument AST back to source code
+                    return ast.unparse(node.args[0])
     return None
 
 
@@ -46,7 +46,6 @@ def get_first_arg_source() -> str:
         source_lines = frame_info.code_context  # type: ignore
         start_lineno = frame_info.lineno  # type: ignore
 
-        # TODO check correctness
         # Accumulate lines until parentheses are balanced
         full_code = ""
         open_parens = 0
@@ -168,19 +167,19 @@ def to_geojson(value):
         case None:
             return None
         case {"type": _, "coordinates": _}:
-            # Si c'est déjà un dictionnaire GeoJSON valide
+            # If already a valid GeoJSON dict
             return value
         case [x, y] if isnum(x) and isnum(y):
-            # Point : 2 values
+            # Point: 2 values
             return {"type": "Point", "coordinates": [x, y]}
         case [xmin, ymin, xmax, ymax] if isnum(xmin) and isnum(ymin) and isnum(xmax) and isnum(ymax):
-            # Bbox : 4 values
+            # Bbox: 4 values
             return {
                 "type": "Polygon",
                 "coordinates": [[[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin], [xmin, ymin]]],
             }
         case _ if isinstance(value, Sequence):
-            # Sequence of coordinates: LineString ou Polygon
+            # Sequence of coordinates: LineString or Polygon
             coords = []
             for [x, y] in value:
                 coords.append([x, y])
