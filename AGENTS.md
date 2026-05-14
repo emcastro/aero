@@ -14,16 +14,15 @@ You are assisting with a Python geospatial and aerial terrain analysis project. 
 - GeoJSON: For geographic feature representation.
 - LRU Caching: For performance optimization (to be used with extreme caution).
 
-## Code Style & Preferences
+## Code Style and Preferences
 - Use type hints with custom types from `utyping` module.
 - Follow MicroPython conventions where applicable.
 - Include docstrings for functions explaining purpose and parameters.
 - Use logging via `ulogging` for debugging.
 - Optimize for memory efficiency.
-- No third party libraries can be used for any use because it does not fit the
-  the target microcontroller, except for pytest purpose.
+- No third party libraries can be used — they do not fit the target microcontroller, except for pytest purpose.
 - Don't use _-prefix for private function, unless stated.
-- Do not guess future requirements. It is the responsibility of you human.
+- Do not guess future requirements. It is the responsibility of the user.
 
 ## Project Structure
 ```
@@ -40,7 +39,7 @@ experiments/                # Testing and experimentation notebooks
 typings/                    # Typing stubs for MicroPython (https://micropython-stubs.readthedocs.io)
 ```
 
-## Project configuration
+## Project Configuration
 - All the Python tools MUST be configured in the `pyproject.toml` file.
 - We use `uv` for package and tool management.
 
@@ -63,14 +62,15 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 - Cache geographic calculations where appropriate.
 - Stream large datasets rather than loading entirely.
 
-## Test
+## Tests
 - Use `uv run` to activate the environment.
 - Use pytest to run tests.
 - Use mutmut for mutation testing.
 - Use the directives of tests/AGENTS.md.
 - When using assert, don't add explanation text.
+- **Coordinate ranges for tests**: X (lon) and Y (lat) must use *distinct, non-overlapping* numeric ranges so tests can catch axis-swapping bugs. Both axes must include negative values. WGS84 bounds apply: lon ∈ [-180, 180], lat ∈ [-90, 90]. Example: X ∈ [-70, -50] and Y ∈ [-2, 10] is valid; X ∈ [0, 15] and Y ∈ [0, 15] is not.
 
-## Code style
+## Code Style
 - Use the f"{dirname}/{basename}" pattern to build pathname, not os.path.join.
 - Use typing annotation, but not for function return type.
 - Do not use return type annotation, unless instructed.

@@ -6,9 +6,9 @@ from geodata_dump import geodump, multipoint
 
 from geolib import (
     SideSegmentInterpolator,
-    argminmax,
     calc_bbox,
     convexpoly_left_right,
+    find_idx_left_bottom_and_top,
     wgs84_azimuth,
     wgs84_project,
     wgs84_project_xy,
@@ -46,7 +46,7 @@ def test_project_consistency():
 
 def test_azimuth_project_consistency():
     """Project a point and verify azimuth consistency."""
-    origins = [(0.0, 0.0), (45.0, 45.0), (-120.0, 30.0)]
+    origins = [(0.0, 0.0), (45.0, 45.0), (10.0, -20.0), (30.0, -40.0), (50.0, -10.0)]
     azimuths_d = [0.0, 90.0, 225.5, 359.9]
     dist_m = 1_000_000  # 1000 km
 
@@ -60,9 +60,24 @@ def test_azimuth_project_consistency():
             geodump(dest, pt_idx, azimuth_d, dist_m=dist_m)
 
 
+def test_azimuth_negative():
+    """Negative azimuths produce same dest as their positive equivalent."""
+    neg_azimuths_d = [-25.0, -45.0, -90.0, -160.0]
+    pos_azimuths_d = [x + 360.0 for x in neg_azimuths_d]
+    origins = [(-60.0, -20.0), (-55.0, -15.0), (-65.0, -25.0)]
+    dist_m = 10000
+
+    for pt_idx, point in enumerate(origins):
+        geodump(point, pt_idx)
+        for neg_az, pos_az in zip(neg_azimuths_d, pos_azimuths_d):
+            dest_neg = wgs84_project(point, neg_az, dist_m)
+            dest_pos = wgs84_project(point, pos_az, dist_m)
+            assert dest_neg == pytest.approx(dest_pos, abs=METER)
+
+
 def test_azimuth_roundtrip():
     """Project a point and verify azimuth consistency both ways at local scale."""
-    origins = [(0.0, 0.0), (45.0, 45.0), (-120.0, 30.0)]
+    origins = [(10.0, -20.0), (30.0, -40.0), (50.0, -10.0)]
     azimuths_d = [0.0, 90.0, 225.5, 359.9]
     dist_m = 10000  # 10 km
 
@@ -92,86 +107,85 @@ def test_calc_bbox_simple():
     assert geodump(calc_bbox([(1.0, 1.0)])) == (1.0, 1.0, 1.0, 1.0)
 
 
-def test_argminmax():
-    vals = [5.0, 1.0, 3.0, 9.0, -2.0]
-    idx_min, idx_max = argminmax(vals)
-    # minimum value -2.0 at index 4, maximum value 9.0 at index 3
-    assert idx_min == 3
-    assert idx_max == 4
-
-
-def test_argminmax_all_equal():
-    vals = [2.0, 2.0, 2.0]
-    idx_min, idx_max = argminmax(vals)
-    # all values are equal, so min and max indices should be the same (first index)
-    assert idx_min == 0
-    assert idx_max == 0
-
-
-def test_argminmax_empty():
-    vals = []
-    idx_min, idx_max = argminmax(vals)
-    # for an empty list, both indices should be -1
-    assert idx_min == -1
-    assert idx_max == -1
-
-
-## TODO round robin test, clockwise and anti-clockwise
+def test_find_idx_left_bottom_and_top():
+    points = [(-60.0, 0.0), (-55.0, -1.0), (-65.0, 5.0), (-67.0, 10.0),(-70.0, 10.0), (-65.0, -2.0), (-64.0, -2.0), (-60.0, 1.0)]
+    geodump(points)
+    idx_left_bottom, idx_left_top = find_idx_left_bottom_and_top(points)
+    assert idx_left_bottom == 5
+    assert idx_left_top == 4
+    geodump(points[idx_left_bottom], idx_left_bottom)
+    geodump(points[idx_left_top], idx_left_top)
 
 
 def test_convexpoly_left_right_rotations():
     """Test convexpoly_left_right with all possible rotations of the polygon."""
     # Original polygon data without the trailing first point
     unclosed_polygon = [
-        (0.0, 3.0),
-        (-2.0, 6.0),
-        (8.0, 15.0),
-        # (9.0, 15.0),
-        (12.0, 10.0),
-        (12.0, 9.0),
-        # (6.0, 3.0),
+        (-65.0, -2.0),
+        (-67.0, 1.0),
+        (-57.0, 10.0),
+        (-56.0, 10.0),
+        (-53.0, 5.0),
+        (-53.0, 4.0),
+        (-59.0, -2.0),
     ]
+
+    geodump(unclosed_polygon)
 
     # Expected results for the original polygon
-    expected_left = [(0.0, 3.0), (-2.0, 6.0), (8.0, 15.0)]
+    expected_left = [(-65.0, -2.0), (-67.0, 1.0), (-57.0, 10.0)]
     expected_right = [
-        (0.0, 3.0),
-        #   (6.0, 3.0),
-        (12.0, 9.0),
-        (12.0, 10.0),
-        #   (9.0, 15.0),
-        (8.0, 15.0),
+        (-65.0, -2.0),
+        (-59.0, -2.0),
+        (-53.0, 4.0),
+        (-53.0, 5.0),
+        (-56.0, 10.0),
+        (-57.0, 10.0),
     ]
 
+    geodump(expected_left)
+    geodump(expected_right)
+
     # Test all rotations of the polygon
-    for rotation in range(len(unclosed_polygon)):
-        # Rotate the polygon by removing the first element and appending it at the end
-        rotated_polygon = unclosed_polygon[rotation:] + unclosed_polygon[:rotation]
-        rotated_polygon.append(rotated_polygon[0])
+    for reverse in [False, True]:
+        for rotation in range(len(unclosed_polygon)):
+            # Rotate the polygon by removing the first element and appending it at the end
+            rotated_polygon = unclosed_polygon[rotation:] + unclosed_polygon[:rotation]
+            rotated_polygon.append(rotated_polygon[0])
+            if reverse:
+                rotated_polygon.reverse()
 
-        # Action
-        left, right = convexpoly_left_right(rotated_polygon)
+            # Action
+            left, right = convexpoly_left_right(rotated_polygon)
 
-        # # Assertion
-        assert left == expected_left
-        assert right == expected_right
+            # Assertion (only for original orientation; expected values are hardcoded for it)
+            assert left == expected_left
+            assert right == expected_right
 
-        # Visualization
-        geodump(rotated_polygon, rotation)
-        geodump(left, rotation)
-        geodump(right, rotation)
+            # Visualization
+            geodump(rotated_polygon, rotation)
+            geodump(left, rotation)
+            geodump(right, rotation)
 
 
-def test_sidesegmentinterpolator_x_at_y() -> None:
+def test_sidesegmentinterpolator_x_at_y():
     # polygon anti-clockwise starting at bottom
-    polygon = [(0.0, 103.0), (6.0, 103.0), (12.0, 109.0), (12.0, 110.0), (9.0, 115.0), (8.0, 115.0), (-2.0, 106.0), (0.0, 103.0)]
-    polygon.reverse()
+    polygon = [
+        (-59.0, -2.0),
+        (-53.0, 4.0),
+        (-53.0, 5.0),
+        (-56.0, 10.0),
+        (-57.0, 10.0),
+        (-67.0, 1.0),
+        (-65.0, -2.0),
+        (-59.0, -2.0),
+    ]
 
-    # polygon = [(0.0, 103.0), (6.0, 103.0), (12.0, 109.0), (12.0, 110.0), (9.0, 115.0),(8.0, 115.0), (-2.0, 106.0), (0.0, 103.0)]
+    polygon.reverse()
     left, right = convexpoly_left_right(polygon)
 
-    assert left == [(0.0, 103.0), (-2.0, 106.0), (8.0, 115.0)]
-    assert right == [(0.0, 103.0), (6.0, 103.0), (12.0, 109.0), (12.0, 110.0), (9.0, 115.0), (8.0, 115.0)]
+    assert left == [(-65.0, -2.0), (-67.0, 1.0), (-57.0, 10.0)]
+    assert right == [(-65.0, -2.0), (-59.0, -2.0), (-53.0, 4.0), (-53.0, 5.0), (-56.0, 10.0), (-57.0, 10.0)]
 
     geodump(polygon)
     geodump(left)
@@ -179,20 +193,30 @@ def test_sidesegmentinterpolator_x_at_y() -> None:
 
     right_side = SideSegmentInterpolator(right)
 
-    right_test_points = [(6.0, 103.0), (7.0, 104.0), (12.0, 109.0), (12.0, 109.5), (12.0, 110.0), (11.4, 111.0), (9.0, 115.0)]
+    right_test_points = [
+        (-59.0, -2.0),
+        (-58.0, -1.0),
+        (-53.0, 4.0),
+        (-53.0, 4.5),
+        (-53.0, 5.0),
+        (-53.6, 6.0),
+        (-56.0, 10.0),
+    ]
     for awaited_x, y in right_test_points:
         x = right_side.x_at_y(y)
-        pt = (x, y)
         right_awaited_pt = (awaited_x, y)
-        # geodump(pt, "right", x, y)
         geodump(right_awaited_pt, awaited_x, y)
 
-    left_side = SideSegmentInterpolator(right)
+    left_side = SideSegmentInterpolator(left)
 
-    left_test_points = [(0.0, 103.0), (-1.0, 104.5), (-2.0, 106.0), (0.25, 108.0), (8.0, 115.0)]
+    left_test_points = [(-65.0, -2.0), (-66.0, -0.5), (-67.0, 1.0), (-64.75, 3.0), (-57.0, 10.0)]
     for awaited_x, y in left_test_points:
         x = left_side.x_at_y(y)
-        pt = (x, y)
         left_awaited_pt = (awaited_x, y)
-        # geodump(pt, "right", x, y)
         geodump(left_awaited_pt, awaited_x, y)
+
+
+def test_convexpoly_left_right_empty():
+    left, right = convexpoly_left_right([])
+    assert left == []
+    assert right == []

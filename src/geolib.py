@@ -124,19 +124,25 @@ def calc_bbox(coords: List[Tuple[float, float]]):
     return min_lon, min_lat, max_lon, max_lat
 
 
-def argminmax(items: List[float]):
-    idx_min = -1
-    value_max = MINUS_INF
-    idx_max = -1
-    value_min = PLUS_INF
-    for i, item in enumerate(items):
-        if item > value_max:  # pragma: no mutate
-            value_max = item
-            idx_min = i
-        if item < value_min:  # pragma: no mutate
-            value_min = item
-            idx_max = i
-    return idx_min, idx_max
+def find_idx_left_bottom_and_top(points: List[Tuple[float, float]]):
+    if not points:
+        return -1, -1
+    idx_left_bottom = 0
+    idx_left_top = 0
+    min_y = points[0][1]
+    max_y = points[0][1]
+    min_x_at_min_y = points[0][0]
+    min_x_at_max_y = points[0][0]
+    for i, (x, y) in enumerate(points):
+        if y < min_y or (y == min_y and x < min_x_at_min_y):
+            min_y = y
+            min_x_at_min_y = x
+            idx_left_bottom = i
+        if y > max_y or (y == max_y and x < min_x_at_max_y):
+            max_y = y
+            min_x_at_max_y = x
+            idx_left_top = i
+    return idx_left_bottom, idx_left_top
 
 
 def convexpoly_left_right(points: List[Tuple[float, float]]):
@@ -146,28 +152,24 @@ def convexpoly_left_right(points: List[Tuple[float, float]]):
     :param points: Points of a convex polygon
     :type points: List[Tuple[float, float]]
     """
-    ys = [y for x, y in points]
-    idx_min, idx_max = argminmax(ys)
+    if not points:
+        return [], []
 
-    # up: small y to big y
-    # down: big y to small
+    idx_left_bottom, idx_left_top = find_idx_left_bottom_and_top(points)
 
-    if idx_min < idx_max:
-        points_down = points[idx_min : idx_max + 1]
-        points_up = points[idx_max:] + points[1 : idx_min + 1]
+    if idx_left_bottom < idx_left_top:
+        side_a = points[idx_left_bottom : idx_left_top + 1]
+        side_b = points[idx_left_top:] + points[1 : idx_left_bottom + 1]
     else:
-        points_down = points[idx_min:] + points[1 : idx_max + 1]
-        points_up = points[idx_max : idx_min + 1]
+        side_a = points[idx_left_bottom:] + points[1 : idx_left_top + 1]
+        side_b = points[idx_left_top : idx_left_bottom + 1]
 
-    if points_up[0][0] < points_up[1][0]:
-        points_down.reverse()
-        left = points_down
-        right = points_up
+    side_b.reverse()
+
+    if side_a[1][0] < side_b[1][0]:
+        return side_a, side_b
     else:
-        points_down.reverse()
-        left = points_up
-        right = points_down
-    return left, right
+        return side_b, side_a
 
 
 class SideSegmentInterpolator:
