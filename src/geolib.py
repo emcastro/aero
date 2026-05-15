@@ -198,8 +198,7 @@ class SideSegmentInterpolator:
                 searching = pt_a[1] == pt_b[1]
             # ...
             self.coef = (pt_b[0] - pt_a[0]) / (pt_b[1] - pt_a[1])
-            self.base = pt_a[1] - self.coef * pt_a[0]
-
+            self.base = pt_a[0] - self.coef * pt_a[1]
         return y * self.coef + self.base
 
     def restart(self):

@@ -63,12 +63,7 @@ typings/                    # Typing stubs for MicroPython (https://micropython-
 - Stream large datasets rather than loading entirely.
 
 ## Tests
-- Use `uv run` to activate the environment.
-- Use pytest to run tests.
-- Use mutmut for mutation testing.
-- Use the directives of tests/AGENTS.md.
-- When using assert, don't add explanation text.
-- **Coordinate ranges for tests**: X (lon) and Y (lat) must use *distinct, non-overlapping* numeric ranges so tests can catch axis-swapping bugs. Both axes must include negative values. WGS84 bounds apply: lon ∈ [-180, 180], lat ∈ [-90, 90]. Example: X ∈ [-70, -50] and Y ∈ [-2, 10] is valid; X ∈ [0, 15] and Y ∈ [0, 15] is not.
+- Read tests/AGENTS.md before working on tests.
 
 ## Code Style
 - Use the f"{dirname}/{basename}" pattern to build pathname, not os.path.join.

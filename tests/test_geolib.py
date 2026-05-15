@@ -205,15 +205,21 @@ def test_sidesegmentinterpolator_x_at_y():
     for awaited_x, y in right_test_points:
         x = right_side.x_at_y(y)
         right_awaited_pt = (awaited_x, y)
+        right_pt=(x,y)
         geodump(right_awaited_pt, awaited_x, y)
+        geodump(right_pt, x, y)
+        assert x == pytest.approx(awaited_x, abs=EPS)
 
     left_side = SideSegmentInterpolator(left)
 
-    left_test_points = [(-65.0, -2.0), (-66.0, -0.5), (-67.0, 1.0), (-64.75, 3.0), (-57.0, 10.0)]
+    left_test_points = [(-65.0, -2.0), (-66.0, -0.5), (-67.0, 1.0), (-64.0, 3.7), (-57.0, 10.0)]
     for awaited_x, y in left_test_points:
         x = left_side.x_at_y(y)
         left_awaited_pt = (awaited_x, y)
+        left_pt=(x,y)
         geodump(left_awaited_pt, awaited_x, y)
+        geodump(left_pt, x, y)
+        assert x == pytest.approx(awaited_x, abs=EPS)
 
 
 def test_convexpoly_left_right_empty():
